@@ -796,7 +796,9 @@ class FabricManagementModel(BaseModel):
     replication_mode: FabricReplicationMode = Field(default=FabricReplicationMode.MULTICAST.value, alias="replicationMode")
 
     # Netflow settings
-    netflow_settings: Optional[NetflowSettingsModel] = Field(default=None, alias="netflowSettings")
+    # netflow_settings: Optional[NetflowSettingsModel] = Field(default=None, alias="netflowSettings")
+    # netflow_settings: Optional[NetflowSettingsModel] = Field(default_factory=lambda: NetflowSettingsModel(netflow=False), alias="netflowSettings")
+    # netflow_settings: NetflowSettingsModel = Field(alias="netflowSettings")
 
     # VPC and peering settings
     vpc_layer3_peer_router: bool = Field(default=True, alias="vpcLayer3PeerRouter")
@@ -966,11 +968,11 @@ class FabricManagementModel(BaseModel):
 
     # Routing and STP
     stp_root_option: StpRootOption = Field(default=StpRootOption.UNMANAGED.value, alias="stpRootOption")
-    leaf_to_r_id_range: bool = Field(default=False, alias="leafToRIdRange")
+    leaf_to_r_id_range: bool = Field(default=False, alias="leafTorIdRange")
 
     # Bootstrap and day0
     day0_bootstrap: bool = Field(default=False, alias="day0Bootstrap")
-    bootstrap_multi_subnet: str = Field(default="#Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway, Scope_Subnet_Prefix", alias="bootstrapMultiSubnet")
+    # bootstrap_multi_subnet: str = Field(default="#Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway, Scope_Subnet_Prefix", alias="bootstrapMultiSubnet")
 
     # OAM and debugging
     next_generation_oam: bool = Field(default=True, alias="nextGenerationOAM")
@@ -1118,7 +1120,7 @@ class FabricModel(BaseModel):
     category: str = Field(default="fabric", alias="category")
     security_domain: str = Field(default="all", alias="securityDomain")
     location: Optional[LocationModel] = Field(default=None, alias="location")
-    management: FabricManagementModel = Field(alias="management")
+    management: Optional[FabricManagementModel] = Field(default=None, alias="management")
 
     @field_validator("name", mode="before")
     @classmethod

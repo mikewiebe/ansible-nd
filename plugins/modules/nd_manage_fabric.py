@@ -1097,14 +1097,14 @@ from ..module_utils.common.models import merge_models, model_payload_with_defaul
 
 from ansible_collections.cisco.nd.plugins.module_utils.manage.fabric.model_playbook_fabric import FabricModel
 
-# try:
-#     from pydantic import BaseModel
-# except ImportError:
-#     HAS_PYDANTIC = False
-#     PYDANTIC_IMPORT_ERROR = traceback.format_exc()
-# else:
-#     HAS_PYDANTIC = True
-#     PYDANTIC_IMPORT_ERROR = None
+try:
+    from pydantic import BaseModel
+except ImportError:
+    HAS_PYDANTIC = False
+    PYDANTIC_IMPORT_ERROR = traceback.format_exc()
+else:
+    HAS_PYDANTIC = True
+    PYDANTIC_IMPORT_ERROR = None
 
 try:
     from deepdiff import DeepDiff
@@ -1888,8 +1888,8 @@ def main():
     if sys.version_info < (3, 9):
         module.fail_json(msg="Python version 3.9 or higher is required for this module.")
 
-    # if not HAS_PYDANTIC:
-    #     module.fail_json(msg=missing_required_lib("pydantic"), exception=PYDANTIC_IMPORT_ERROR)
+    if not HAS_PYDANTIC:
+        module.fail_json(msg=missing_required_lib("pydantic"), exception=PYDANTIC_IMPORT_ERROR)
     if not HAS_DEEPDIFF:
         module.fail_json(msg=missing_required_lib("deepdiff"), exception=DEEPDIFF_IMPORT_ERROR)
 
