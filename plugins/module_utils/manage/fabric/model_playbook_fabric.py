@@ -1119,7 +1119,7 @@ class FabricModel(BaseModel):
     alert_suspend: str = Field(default="disabled", alias="alertSuspend")
     category: str = Field(default="fabric", alias="category")
     security_domain: str = Field(default="all", alias="securityDomain")
-    location: Optional[LocationModel] = Field(default=None, alias="location")
+    location: Optional[LocationModel] = Field(default={}, alias="location")
     management: Optional[FabricManagementModel] = Field(default=None, alias="management")
 
     @field_validator("name", mode="before")

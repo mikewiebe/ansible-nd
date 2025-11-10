@@ -1697,6 +1697,7 @@ class Replaced:
             want_fabric = fabric
             have_fabric = self.common.fabric_in_have(want_fabric.name)
 
+
             if want_fabric == have_fabric:
                 # want_fabric and have_fabric are the same, no action needed
                 self.log.debug("Fabric %s is already in the desired state, skipping.", want_fabric.name)
@@ -1710,6 +1711,9 @@ class Replaced:
                 # If the fabric already exists in the have state, we will update it
                 self.path = "/api/v1/manage/fabrics" + f"/{want_fabric.name}"
                 self.verb = "PUT"
+                # Log the properties that need to be updated
+                diff = DeepDiff(have_fabric.model_dump(), want_fabric.model_dump(), ignore_order=True)
+                self.log.debug("Differences for fabric %s: %s", want_fabric.name, diff)
 
             # For replaced we just use the want payload "as is" including any default values
             # This is different from merged where we calculate the difference and only update
