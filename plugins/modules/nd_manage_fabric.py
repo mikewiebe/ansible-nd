@@ -1095,7 +1095,7 @@ from ansible.module_utils.basic import missing_required_lib
 from ..module_utils.common.log import Log
 from ..module_utils.common.models import merge_models, model_payload_with_defaults
 
-from ansible_collections.cisco.nd.plugins.module_utils.manage.fabric.model_playbook_fabric import FabricModel
+from ansible_collections.cisco.nd.plugins.module_utils.manage.fabric.model_common import FabricModelvxlanIbgp
 
 try:
     from pydantic import BaseModel
@@ -1195,7 +1195,14 @@ class GetHave:
         for fabric in self.fabric_state.get("fabrics"):
             if not isinstance(fabric, dict):
                 raise ValueError(f"Fabric data is not a dictionary: {fabric}")
-            validated_fabric = FabricModel(**fabric)
+
+            # Pick Model Based on Fabric Type
+            if fabric['management']['type'] == 'vxlanIbgp':
+                validated_fabric = FabricModelvxlanIbgp(**fabric)
+            else:
+                self.log.warning(f"Unsupported fabric management type: {fabric['management']['type']}")
+                continue
+
             self.have.append(validated_fabric)
             # Sample Fabric Structure
             # fabric = {
@@ -1286,7 +1293,14 @@ class Common:
 
         for fabric in self.task_params.get("config"):
             have_fabric = self.fabric_in_have(fabric["name"])
-            want_fabric = FabricModel(**fabric)
+
+            if fabric['management']['type'] == 'vxlanIbgp':
+                want_fabric = FabricModelvxlanIbgp(**fabric)
+            else:
+                # JSON Fail Here
+                self.log.warning(f"Unsupported fabric management type: {fabric['management']['type']}")
+                continue
+
             if self.state == "merged" and have_fabric is not None:
                 fabric_config_payload = merge_models(have_fabric, want_fabric)
             else:
@@ -1295,7 +1309,12 @@ class Common:
                 #  - Replaced, Deleted, and Query states
                 fabric_config_payload = model_payload_with_defaults(want_fabric)
 
-            fabric = FabricModel(**fabric_config_payload)
+            if fabric['management']['type'] == 'vxlanIbgp':
+                fabric = FabricModelvxlanIbgp(**fabric_config_payload)
+            else:
+                self.log.warning(f"Unsupported fabric management type: {fabric['management']['type']}")
+                continue
+
             self.log.debug("Adding fabric to want list: %s", fabric.name)
             self.log.debug("Fabric model created: %s", fabric.model_dump(by_alias=True))
             # Add the fabric model to the want list

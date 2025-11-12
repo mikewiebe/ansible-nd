@@ -7,9 +7,10 @@ __author__ = "Mike Wiebe"
 """
 Validation model for cisco.nd.manage.fabric playbooks.
 """
+from datetime import datetime
 from enum import Enum
 import re
-from typing import List, Optional
+from typing import List, Optional, Union, Literal
 
 # This try-except block is used to handle the import of Pydantic.
 # If Pydantic is not available, it will define a minimal BaseModel class
@@ -62,7 +63,7 @@ class NetflowExporterModel(BaseModel):
     exporter_ip: str = Field(alias="exporterIp")
     vrf: str = Field(alias="vrf")
     source_interface_name: str = Field(alias="sourceInterfaceName")
-    udp_port: str = Field(alias="udpPort")
+    udp_port: int = Field(alias="udpPort")
 
 
 class NetflowMonitorModel(BaseModel):
@@ -95,7 +96,7 @@ class NetflowRecordModel(BaseModel):
 
     record_name: str = Field(alias="recordName")
     record_template: str = Field(alias="recordTemplate")
-    layer2_record: str = Field(alias="layer2Record")
+    layer2_record: bool = Field(alias="layer2Record")
 
 
 class NetflowSettingsModel(BaseModel):
@@ -114,9 +115,9 @@ class NetflowSettingsModel(BaseModel):
     )
 
     netflow: bool = Field(default=False, alias="netflow")
-    netflow_exporter_list: List[NetflowExporterModel] = Field(default_factory=list, alias="netflowExporterList")
-    netflow_monitor_list: List[NetflowMonitorModel] = Field(default_factory=list, alias="netflowMonitorList")
-    netflow_record_list: List[NetflowRecordModel] = Field(default_factory=list, alias="netflowRecordList")
+    netflow_exporter_list: List[NetflowExporterModel] = Field(default_factory=list, alias="netflowExporterCollection")
+    netflow_monitor_list: List[NetflowMonitorModel] = Field(default_factory=list, alias="netflowMonitorCollection")
+    netflow_record_list: List[NetflowRecordModel] = Field(default_factory=list, alias="netflowRecordCollection")
 
     @field_validator("netflow_exporter_list", "netflow_monitor_list", "netflow_record_list", mode="after")
     @classmethod
@@ -770,6 +771,341 @@ class CoppPolicy(Enum):
         return [cls.DENSE, cls.LENIENT, cls.MODERATE, cls.STRICT, cls.MANUAL]
 
 
+class FabricDesignSettingsModel(BaseModel):
+    """
+    Fabric designer settings for topology planning.
+
+    These settings are used by the fabric designer tool to define the expected
+    topology and number of switches in each role.
+    """
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+    )
+
+    designer_use_robot_password: bool = Field(default=False, alias="designerUseRobotPassword")
+    breakout_spine_interfaces: bool = Field(default=False, alias="breakoutSpineInterfaces")
+    spine_count: int = Field(default=1, ge=0, alias="spineCount")
+    border_count: int = Field(default=0, ge=0, alias="borderCount")
+    leaf_count: int = Field(default=1, ge=0, alias="leafCount")
+
+
+class SyslogCollectionSettingsModel(BaseModel):
+    """Syslog collection settings for anomalies"""
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+    )
+
+    anomalies: List[str] = Field(default_factory=list, alias="anomalies")
+
+
+class SyslogSettingsModel(BaseModel):
+    """Syslog external streaming configuration"""
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+    )
+
+    collection_settings: SyslogCollectionSettingsModel = Field(
+        default_factory=SyslogCollectionSettingsModel,
+        alias="collectionSettings"
+    )
+    facility: str = Field(default="", alias="facility")
+    servers: List[str] = Field(default_factory=list, alias="servers")
+
+
+class EmailBasicCollectionSettingsModel(BaseModel):
+    """Basic email collection settings for anomalies, advisories, and reports"""
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+    )
+
+    collection_type: Literal["basic"] = Field(default="basic", alias="collectionType")
+    anomalies: List[Literal["critical", "major", "minor", "warning"]] = Field(
+        default_factory=list,
+        alias="anomalies",
+        description="Level of anomalies to be collected"
+    )
+    advisories: List[Literal["critical", "major", "warning"]] = Field(
+        default_factory=list,
+        alias="advisories",
+        description="Level of advisories to be collected"
+    )
+    risk_and_conformance_reports: List[Literal["software", "hardware"]] = Field(
+        default_factory=list,
+        alias="riskAndConformanceReports",
+        description="List of risk and conformance report types"
+    )
+
+
+class AdvancedAnomaliesModel(BaseModel):
+    """Advanced anomalies categorization for detailed monitoring"""
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+    )
+
+    active_bugs: List[Literal["critical", "major", "minor", "warning"]] = Field(
+        default_factory=list,
+        alias="activeBugs",
+        description="Anomaly levels from active bugs category"
+    )
+    capacity: List[Literal["critical", "major", "minor", "warning"]] = Field(
+        default_factory=list,
+        alias="capacity",
+        description="Anomaly levels from capacity category"
+    )
+    compliance: List[Literal["critical", "major", "minor", "warning"]] = Field(
+        default_factory=list,
+        alias="compliance",
+        description="Anomaly levels from compliance category"
+    )
+    configuration: List[Literal["critical", "major", "minor", "warning"]] = Field(
+        default_factory=list,
+        alias="configuration",
+        description="Anomaly levels from configuration category"
+    )
+    connectivity: List[Literal["critical", "major", "minor", "warning"]] = Field(
+        default_factory=list,
+        alias="connectivity",
+        description="Anomaly levels from connectivity category"
+    )
+    hardware: List[Literal["critical", "major", "minor", "warning"]] = Field(
+        default_factory=list,
+        alias="hardware",
+        description="Anomaly levels from hardware category"
+    )
+    integrations: List[Literal["critical", "major", "minor", "warning"]] = Field(
+        default_factory=list,
+        alias="integrations",
+        description="Anomaly levels from integrations category"
+    )
+    system: List[Literal["critical", "major", "minor", "warning"]] = Field(
+        default_factory=list,
+        alias="system",
+        description="Anomaly levels from system category"
+    )
+
+
+class AdvancedAdvisoriesModel(BaseModel):
+    """Advanced advisories categorization for detailed monitoring"""
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+    )
+
+    best_practices: List[Literal["critical", "major", "warning"]] = Field(
+        default_factory=list,
+        alias="bestPractices",
+        description="Advisory levels from best practices category"
+    )
+    field_notice: List[Literal["critical", "major", "warning"]] = Field(
+        default_factory=list,
+        alias="fieldNotice",
+        description="Advisory levels from field notice category"
+    )
+    hardware_end_of_life: List[Literal["critical", "major", "warning"]] = Field(
+        default_factory=list,
+        alias="hardwareEndOfLife",
+        description="Advisory levels from hardware end of life category"
+    )
+    software_end_of_life: List[Literal["critical", "major", "warning"]] = Field(
+        default_factory=list,
+        alias="softwareEndOfLife",
+        description="Advisory levels from software end of life category"
+    )
+    psirt: List[Literal["critical", "major", "warning"]] = Field(
+        default_factory=list,
+        alias="psirt",
+        description="Advisory levels from PSIRT category"
+    )
+
+
+class EmailAdvancedCollectionSettingsModel(BaseModel):
+    """Advanced email collection settings with detailed categorization"""
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+    )
+
+    collection_type: Literal["advanced"] = Field(default="advanced", alias="collectionType")
+    anomalies: Optional[AdvancedAnomaliesModel] = Field(
+        default=None,
+        alias="anomalies",
+        description="Detailed anomaly categorization"
+    )
+    advisories: Optional[AdvancedAdvisoriesModel] = Field(
+        default=None,
+        alias="advisories",
+        description="Detailed advisory categorization"
+    )
+    risk_and_conformance_reports: List[Literal["software", "hardware"]] = Field(
+        default_factory=list,
+        alias="riskAndConformanceReports",
+        description="List of risk and conformance report types"
+    )
+
+
+# Union type for email collection settings (discriminated union)
+EmailCollectionSettings = Union[EmailBasicCollectionSettingsModel, EmailAdvancedCollectionSettingsModel]
+
+
+class MessageBusBasicCollectionSettingsModel(BaseModel):
+    """Basic message bus collection settings for anomalies, advisories, and reports"""
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+    )
+
+    collection_type: Literal["basic"] = Field(default="basic", alias="collectionType")
+    anomalies: List[Literal["critical", "major", "minor", "warning"]] = Field(
+        default_factory=list,
+        alias="anomalies",
+        description="Level of anomalies to be collected"
+    )
+    advisories: List[Literal["critical", "major", "warning"]] = Field(
+        default_factory=list,
+        alias="advisories",
+        description="Level of advisories to be collected"
+    )
+    risk_and_conformance_reports: List[Literal["software", "hardware"]] = Field(
+        default_factory=list,
+        alias="riskAndConformanceReports",
+        description="List of risk and conformance report types"
+    )
+
+
+class MessageBusAdvancedCollectionSettingsModel(BaseModel):
+    """Advanced message bus collection settings with detailed categorization"""
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+    )
+
+    collection_type: Literal["advanced"] = Field(default="advanced", alias="collectionType")
+    anomalies: Optional[AdvancedAnomaliesModel] = Field(
+        default=None,
+        alias="anomalies",
+        description="Detailed anomaly categorization"
+    )
+    advisories: Optional[AdvancedAdvisoriesModel] = Field(
+        default=None,
+        alias="advisories",
+        description="Detailed advisory categorization"
+    )
+    risk_and_conformance_reports: List[Literal["software", "hardware"]] = Field(
+        default_factory=list,
+        alias="riskAndConformanceReports",
+        description="List of risk and conformance report types"
+    )
+
+
+# Union type for message bus collection settings (discriminated union)
+MessageBusCollectionSettings = Union[MessageBusBasicCollectionSettingsModel, MessageBusAdvancedCollectionSettingsModel]
+
+
+class EmailSettingsModel(BaseModel):
+    """Email notification settings with full OpenAPI schema compliance"""
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+    )
+
+    name: Optional[str] = Field(default=None, alias="name", description="Name of the email configuration")
+    receiver_email: List[str] = Field(
+        default_factory=list,
+        alias="receiverEmail",
+        description="Email address(es) to receive alerts"
+    )
+    format: Literal["html", "text"] = Field(
+        default="html",
+        alias="format",
+        description="Email format (html or text)"
+    )
+    start_date: Optional[datetime] = Field(
+        default=None,
+        alias="startDate",
+        description="Start date for email alerts (ISO 8601 format)"
+    )
+    collection_frequency_in_days: int = Field(
+        default=0,
+        alias="collectionFrequencyInDays",
+        description="Frequency of email alerts in days"
+    )
+    collection_settings: Optional[EmailCollectionSettings] = Field(
+        default=None,
+        alias="collectionSettings",
+        description="Collection settings (basic or advanced)"
+    )
+    only_include_active_alerts: bool = Field(
+        default=False,
+        alias="onlyIncludeActiveAlerts",
+        description="When true, only include active alerts"
+    )
+
+
+class MessageBusSettingsModel(BaseModel):
+    """Message bus streaming settings with full OpenAPI schema compliance"""
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+    )
+
+    server: Optional[str] = Field(
+        default=None,
+        alias="server",
+        description="Message bus server to which alerts are sent"
+    )
+    collection_type: Optional[Literal["alertsAndEvents", "usage"]] = Field(
+        default=None,
+        alias="collectionType",
+        description="Data collection type for message bus"
+    )
+    collection_settings: Optional[MessageBusCollectionSettings] = Field(
+        default=None,
+        alias="collectionSettings",
+        description="Collection settings (basic or advanced)"
+    )
+
+
+class ExternalStreamingSettingsModel(BaseModel):
+    """External streaming configurations for monitoring data"""
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+    )
+
+    email: List[EmailSettingsModel] = Field(default_factory=list, alias="email")
+    message_bus: List[MessageBusSettingsModel] = Field(default_factory=list, alias="messageBus")
+    syslog: SyslogSettingsModel = Field(default_factory=SyslogSettingsModel, alias="syslog")
+
+
 class FabricManagementModel(BaseModel):
     """
     A comprehensive model representing fabric management configuration for VXLAN fabrics.
@@ -796,9 +1132,11 @@ class FabricManagementModel(BaseModel):
     replication_mode: FabricReplicationMode = Field(default=FabricReplicationMode.MULTICAST.value, alias="replicationMode")
 
     # Netflow settings
-    # netflow_settings: Optional[NetflowSettingsModel] = Field(default=None, alias="netflowSettings")
-    # netflow_settings: Optional[NetflowSettingsModel] = Field(default_factory=lambda: NetflowSettingsModel(netflow=False), alias="netflowSettings")
-    # netflow_settings: NetflowSettingsModel = Field(alias="netflowSettings")
+    netflow_settings: NetflowSettingsModel = Field(default_factory=NetflowSettingsModel, alias="netflowSettings")
+
+    # Fabric Design settings
+    fabric_design_settings: FabricDesignSettingsModel = Field(default_factory=FabricDesignSettingsModel, alias="fabricDesignSettings")
+    fabric_designer: bool = Field(default=False, alias="fabricDesigner")
 
     # VPC and peering settings
     vpc_layer3_peer_router: bool = Field(default=True, alias="vpcLayer3PeerRouter")
@@ -815,6 +1153,15 @@ class FabricManagementModel(BaseModel):
     fabric_vpc_qos_policy_name: str = Field(default="spine_qos_for_fabric_vpc_peering", alias="fabricVpcQosPolicyName")
     fabric_vpc_domain_id: bool = Field(default=False, alias="fabricVpcDomainId")
 
+    # Additional routing properties
+    advertise_physical_ip: bool = Field(default=False, alias="advertisePhysicalIp")
+    advertise_physical_ip_on_border: bool = Field(default=True, alias="advertisePhysicalIpOnBorder")
+    anycast_border_gateway_advertise_physical_ip: bool = Field(default=False, alias="anycastBorderGatewayAdvertisePhysicalIp")
+
+    # Load balancing & traffic
+    dlb: bool = Field(default=False, alias="dlb", description="Dynamic Load Balancing")
+    ai_load_sharing: bool = Field(default=False, alias="aiLoadSharing")
+
     # VNI and VLAN ranges
     l3_vni_range: str = Field(default="50000-59000", alias="l3VniRange")
     l2_vni_range: str = Field(default="30000-49000", alias="l2VniRange")
@@ -826,7 +1173,7 @@ class FabricManagementModel(BaseModel):
     bgp_loopback_id: int = Field(default=0, alias="bgpLoopbackId")
     bgp_loopback_ip_range: str = Field(default="10.2.0.0/22", alias="bgpLoopbackIpRange")
     bgp_authentication: bool = Field(default=False, alias="bgpAuthentication")
-    bgp_authentication_key_type: BgpAuthenticationKeyType = Field(default=BgpAuthenticationKeyType.THREE_DES.value, alias="bgpAuthenticationKeyType")
+    # bgp_authentication_key_type: BgpAuthenticationKeyType = Field(default=BgpAuthenticationKeyType.THREE_DES.value, alias="bgpAuthenticationKeyType")
     auto_bgp_neighbor_description: bool = Field(default=True, alias="autoBgpNeighborDescription")
 
     # NVE settings
@@ -921,6 +1268,7 @@ class FabricManagementModel(BaseModel):
     site_id: str = Field(default="4225625065", alias="siteId")
     power_redundancy_mode: PowerRedundancyMode = Field(default=PowerRedundancyMode.REDUNDANT.value, alias="powerRedundancyMode")
     heartbeat_interval: int = Field(default=190, alias="heartbeatInterval")
+    banner: Optional[str] = Field(default=None, alias="banner", description="Login banner message")
 
     # QoS and queuing
     default_queuing_policy: bool = Field(default=False, alias="defaultQueuingPolicy")
@@ -998,7 +1346,7 @@ class FabricManagementModel(BaseModel):
     dns_vrf_collection: List[str] = Field(default_factory=lambda: ["string"], alias="dnsVrfCollection")
     syslog_server_collection: List[str] = Field(default_factory=lambda: ["string"], alias="syslogServerCollection")
     syslog_server_vrf_collection: List[str] = Field(default_factory=lambda: ["string"], alias="syslogServerVrfCollection")
-    syslog_severity_collection: List[str] = Field(default_factory=lambda: ["7"], alias="syslogSeverityCollection")
+    syslog_severity_collection: List[int] = Field(default_factory=lambda: [7], alias="syslogSeverityCollection", description="Syslog severity levels (0-7)")
 
     # Extra configuration sections
     extra_config_leaf: str = Field(default="string", alias="extraConfigLeaf")
@@ -1089,7 +1437,7 @@ class FabricManagementModel(BaseModel):
         return value
 
 
-class FabricModel(BaseModel):
+class FabricModelvxlanIbgp(BaseModel):
     """
     Represents a Fabric model in the network infrastructure.
     This class models a fabric configuration including its name, security domain,
@@ -1115,11 +1463,15 @@ class FabricModel(BaseModel):
         populate_by_name=True,
     )
 
+
     name: str = Field(default="", alias="name")
     alert_suspend: str = Field(default="disabled", alias="alertSuspend")
     category: str = Field(default="fabric", alias="category")
     security_domain: str = Field(default="all", alias="securityDomain")
-    location: Optional[LocationModel] = Field(default={}, alias="location")
+    telemetry_collection: bool = Field(default=False, alias="telemetryCollection")
+    license_tier: str = Field(default="premier", alias="licenseTier", description="License Tier value of a fabric (premier, advantage, essentials)")
+    location: LocationModel = Field(default_factory=LocationModel, alias="location")
+    external_streaming_settings: ExternalStreamingSettingsModel = Field(default_factory=ExternalStreamingSettingsModel, alias="externalStreamingSettings")
     management: Optional[FabricManagementModel] = Field(default=None, alias="management")
 
     @field_validator("name", mode="before")
