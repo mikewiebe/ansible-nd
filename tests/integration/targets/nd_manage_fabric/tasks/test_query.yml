@@ -1,0 +1,157 @@
+---
+# Query state tests for nd_manage_fabric module
+# Tests fabric information retrieval
+
+- name: Test Query 1 - Query all fabrics
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics
+  register: query_test1_result
+
+- name: Verify Query Test 1 - All fabrics query
+  assert:
+    that:
+      - query_test1_result is not changed
+      - query_test1_result.jsondata is defined
+      - query_test1_result.jsondata is iterable
+    fail_msg: "All fabrics query failed"
+    success_msg: "All fabrics queried successfully"
+
+- name: Test Query 2 - Query specific fabric by name
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics?name={{ basic_fabric_config.name }}
+  register: query_test2_result
+
+- name: Verify Query Test 2 - Specific fabric query
+  assert:
+    that:
+      - query_test2_result is not changed
+      - query_test2_result.jsondata is defined
+      - query_test2_result.jsondata | length >= 0
+    fail_msg: "Specific fabric query failed"
+    success_msg: "Specific fabric queried successfully"
+
+- name: Test Query 3 - Query multiple fabrics by name
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics?name={{ basic_fabric_config.name }},{{ aiml_fabric_config.name }},{{ ebgp_fabric_config.name }}
+  register: query_test3_result
+
+- name: Verify Query Test 3 - Multiple fabrics query
+  assert:
+    that:
+      - query_test3_result is not changed
+      - query_test3_result.jsondata is defined
+      - query_test3_result.jsondata is iterable
+    fail_msg: "Multiple fabrics query failed"
+    success_msg: "Multiple fabrics queried successfully"
+
+- name: Test Query 4 - Query fabric by category
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics?category=fabric
+  register: query_test4_result
+
+- name: Verify Query Test 4 - Category query
+  assert:
+    that:
+      - query_test4_result is not changed
+      - query_test4_result.jsondata is defined
+      - query_test4_result.jsondata is iterable
+    fail_msg: "Category query failed"
+    success_msg: "Category query successful"
+
+- name: Test Query 5 - Query fabric by security domain
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics?security_domain=all
+  register: query_test5_result
+
+- name: Verify Query Test 5 - Security domain query
+  assert:
+    that:
+      - query_test5_result is not changed
+      - query_test5_result.jsondata is defined
+    fail_msg: "Security domain query failed"
+    success_msg: "Security domain query successful"
+
+- name: Test Query 6 - Query with multiple filters
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics?category=fabric&security_domain=all
+  register: query_test6_result
+
+- name: Verify Query Test 6 - Multiple filters query
+  assert:
+    that:
+      - query_test6_result is not changed
+      - query_test6_result.jsondata is defined
+    fail_msg: "Multiple filters query failed"
+    success_msg: "Multiple filters query successful"
+
+- name: Test Query 7 - Query non-existent fabric
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics?name=non-existent-fabric-{{ ansible_date_time.epoch }}
+  register: query_test7_result
+
+- name: Verify Query Test 7 - Non-existent fabric query
+  assert:
+    that:
+      - query_test7_result is not changed
+      - query_test7_result.jsondata is defined
+      - query_test7_result.jsondata | length == 0
+    fail_msg: "Non-existent fabric query failed"
+    success_msg: "Non-existent fabric query handled correctly"
+
+- name: Test Query 8 - Query with fabric management properties
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics?name={{ advanced_fabric_config.name }}&category=fabric&management.type=vxlanEbgp
+  register: query_test8_result
+
+- name: Verify Query Test 8 - Management properties query
+  assert:
+    that:
+      - query_test8_result is not changed
+      - query_test8_result.jsondata is defined
+    fail_msg: "Management properties query failed"
+    success_msg: "Management properties query successful"
+
+- name: Test Query 9 - Query with location filters
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics?location.latitude=37.7749&location.longitude=-122.4194
+  register: query_test9_result
+
+- name: Verify Query Test 9 - Location query
+  assert:
+    that:
+      - query_test9_result is not changed
+      - query_test9_result.jsondata is defined
+    fail_msg: "Location query failed"
+    success_msg: "Location query successful"
+
+- name: Test Query 10 - Query with complex management configuration
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics?category=fabric&management.type=aimlVxlanEbgp&management.bgp_asn=65000&management.replication_mode=ingress&management.fabric_interface_type=unNumbered
+  register: query_test10_result
+
+- name: Verify Query Test 10 - Complex management query
+  assert:
+    that:
+      - query_test10_result is not changed
+      - query_test10_result.jsondata is defined
+    fail_msg: "Complex management query failed"
+    success_msg: "Complex management query successful"
+
+- name: Display query statistics
+  debug:
+    msg:
+      - "Query state tests completed"
+      - "Total fabrics found in query_test1: {{ query_test1_result.jsondata | length }}"
+      - "Specific fabric results: {{ query_test2_result.jsondata | length }}"
+      - "Multiple fabrics results: {{ query_test3_result.jsondata | length }}"
+      - "All query operations executed successfully"

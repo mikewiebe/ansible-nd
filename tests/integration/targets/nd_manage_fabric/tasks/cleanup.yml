@@ -1,0 +1,187 @@
+---
+# Cleanup tasks for nd_manage_fabric module tests
+# Removes all test fabrics and resets environment
+
+- name: Query all fabrics before cleanup
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics
+  register: pre_cleanup_query
+  ignore_errors: true
+
+- name: Display pre-cleanup fabric count
+  debug:
+    msg:
+      - "Existing fabrics found before cleanup"
+      - "{{ pre_cleanup_query.jsondata.fabrics | length }} fabrics found."
+
+- name: Clean up all test fabrics by prefix
+  cisco.nd.nd_manage_fabric:
+    state: deleted
+    config:
+      # Basic test fabrics
+      - name: "{{ basic_fabric_config.name }}"
+      - name: "{{ aiml_fabric_config.name }}"
+      - name: "{{ ebgp_fabric_config.name }}"
+      - name: "{{ campus_fabric_config.name }}"
+      - name: "{{ advanced_fabric_config.name }}"
+      - name: "{{ external_fabric_config.name }}"
+      
+      # Merged test fabrics
+      - name: "{{ test_fabric_prefix }}-merged-basic"
+      - name: "{{ test_fabric_prefix }}-merged-advanced"
+      - name: "{{ test_fabric_prefix }}-merged-aiml"
+      - name: "{{ test_fabric_prefix }}-merged-multiple1"
+      - name: "{{ test_fabric_prefix }}-merged-multiple2"
+      - name: "{{ test_fabric_prefix }}-merged-multiple3"
+      - name: "{{ test_fabric_prefix }}-merged-location"
+      - name: "{{ test_fabric_prefix }}-merged-server"
+      
+      # Replaced test fabrics
+      - name: "{{ test_fabric_prefix }}-replaced"
+      
+      # Overridden test fabrics
+      - name: "{{ test_fabric_prefix }}-overridden-single"
+      - name: "{{ test_fabric_prefix }}-overridden-multi1"
+      - name: "{{ test_fabric_prefix }}-overridden-multi2"
+      - name: "{{ test_fabric_prefix }}-overridden-multi3"
+      - name: "{{ test_fabric_prefix }}-overridden-comprehensive"
+      
+      # Batch deletion test fabrics
+      - name: "{{ test_fabric_prefix }}-delete-batch1"
+      - name: "{{ test_fabric_prefix }}-delete-batch2"
+      - name: "{{ test_fabric_prefix }}-delete-batch3"
+      
+      # Property test fabrics
+      - name: "{{ test_fabric_prefix }}-prop-required"
+      - name: "{{ test_fabric_prefix }}-prop-bgp-asn"
+      - name: "{{ test_fabric_prefix }}-prop-mac"
+      - name: "{{ test_fabric_prefix }}-prop-mtu"
+      - name: "{{ test_fabric_prefix }}-prop-vni"
+      - name: "{{ test_fabric_prefix }}-prop-vlan"
+      - name: "{{ test_fabric_prefix }}-prop-ospf"
+      - name: "{{ test_fabric_prefix }}-prop-location"
+      - name: "{{ test_fabric_prefix }}-prop-vpc"
+      - name: "{{ test_fabric_prefix }}-prop-aiml"
+      - name: "{{ test_fabric_prefix }}-prop-booleans"
+      - name: "{{ test_fabric_prefix }}-prop-constraints"
+      
+      # Enum test fabrics
+      - name: "{{ test_fabric_prefix }}-enum-bgp-auth-3des"
+      - name: "{{ test_fabric_prefix }}-enum-interface-numbered"
+      - name: "{{ test_fabric_prefix }}-enum-interface-unnumbered"
+      - name: "{{ test_fabric_prefix }}-enum-interface-p2p"
+      - name: "{{ test_fabric_prefix }}-enum-type-vxlan-ibgp"
+      - name: "{{ test_fabric_prefix }}-enum-type-vxlan-ebgp"
+      - name: "{{ test_fabric_prefix }}-enum-type-aiml-ibgp"
+      - name: "{{ test_fabric_prefix }}-enum-type-aiml-ebgp"
+      - name: "{{ test_fabric_prefix }}-enum-type-classic-lan"
+      - name: "{{ test_fabric_prefix }}-enum-type-external"
+      - name: "{{ test_fabric_prefix }}-enum-isis-level1"
+      - name: "{{ test_fabric_prefix }}-enum-isis-level2"
+      - name: "{{ test_fabric_prefix }}-enum-ospf"
+      - name: "{{ test_fabric_prefix }}-enum-isis"
+      - name: "{{ test_fabric_prefix }}-enum-overlay-config"
+      - name: "{{ test_fabric_prefix }}-enum-overlay-cli"
+      - name: "{{ test_fabric_prefix }}-enum-power-combined"
+      - name: "{{ test_fabric_prefix }}-enum-qos-25g"
+      - name: "{{ test_fabric_prefix }}-enum-qos-400g"
+      - name: "{{ test_fabric_prefix }}-enum-replication-ingress"
+      - name: "{{ test_fabric_prefix }}-enum-replication-multicast"
+      - name: "{{ test_fabric_prefix }}-enum-stp-mst"
+      - name: "{{ test_fabric_prefix }}-enum-stp-rpvst"
+      
+      # Edge case test fabrics
+      - name: "{{ test_fabric_prefix }}-edge-min-asn"
+      - name: "{{ test_fabric_prefix }}-edge-max-asn"
+      - name: "{{ test_fabric_prefix }}-edge-min-mtu"
+      - name: "{{ test_fabric_prefix }}-edge-max-mtu"
+      - name: "{{ test_fabric_prefix }}-edge-extreme-lat"
+      - name: "{{ test_fabric_prefix }}-edge-extreme-lng"
+      - name: "{{ test_fabric_prefix }}-edge-min-vpc-timer"
+      - name: "{{ test_fabric_prefix }}-edge-max-vpc-timer"
+      - name: "{{ test_fabric_prefix }}-edge-large-vni"
+      - name: "{{ test_fabric_prefix }}-edge-small-vni"
+      - name: "{{ test_fabric_prefix }}-edge-all-bools-true"
+      - name: "{{ test_fabric_prefix }}-edge-all-bools-false"
+      # - name: "{{ test_fabric_prefix }}-edge_with-special.chars"
+      - name: "{{ test_fabric_prefix }}-edge-very-long-fabric-name-with-many-characters-to-test-name-length-limits"
+      - name: "{{ test_fabric_prefix }}-edge-rapid1"
+  register: cleanup_result
+  when: pre_cleanup_query.jsondata.fabrics | length > 0
+
+- name: Display cleanup results
+  debug:
+    msg:
+      - "Cleanup operation completed"
+      - "Changed: {{ cleanup_result.changed | default(false) }}"
+      - "Response: {{ cleanup_result.response | default('No response') }}"
+
+- name: Wait for cleanup to complete
+  pause:
+    seconds: 5
+    prompt: "Waiting for cleanup operations to complete..."
+
+- name: Query all fabrics after cleanup
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics
+  register: post_cleanup_query
+
+# Result that comes back from ND when no fabrics exist
+# ok: [fabric-stage] => {
+#     "rest_fabrics_result": {
+#         "changed": false,
+#         "current": {
+#             "fabrics": []
+#         },
+#         "data": null,
+#         "failed": false,
+#         "jsondata": {
+#             "fabrics": []
+#         },
+#         "previous": {},
+#         "socket": "/Users/mwiebe/.ansible/pc/e47c2aba77",
+#         "status": 200
+#     }
+# }
+
+# Fail if fabrics are found
+- name: Fail if any existing fabrics found after cleanup attempt
+  fail:
+    msg:
+      - "Existing fabrics found before test run."
+      - "{{ post_cleanup_query.jsondata.fabrics | length }} fabrics found."
+  when: post_cleanup_query.jsondata.fabrics | length > 0
+
+# - name: Remove any remaining test fabrics with state overridden
+#   cisco.nd.nd_manage_fabric:
+#     state: overridden
+#     config: []
+#   register: remaining_fabrics_query
+#   ignore_errors: true
+
+# - name: Display final cleanup results
+#   debug:
+#     msg:
+#       - "Final cleanup completed"
+#       - "Remaining test fabrics removed: {{ remaining_test_fabrics | length | default(0) }}"
+#       - "Final cleanup changed: {{ final_cleanup_result.changed | default(false) }}"
+#   when: remaining_test_fabrics is defined
+
+# - name: Final verification query
+#   cisco.nd.nd_manage_fabric:
+#     state: query
+#   register: final_verification_query
+#   ignore_errors: true
+
+# - name: Display final test environment status
+#   debug:
+#     msg:
+#       - "=== Test Environment Cleanup Summary ==="
+#       - "Pre-cleanup fabric count: {{ pre_cleanup_query.response | length | default(0) }}"
+#       - "Post-cleanup fabric count: {{ post_cleanup_query.response | length | default(0) }}"
+#       - "Final fabric count: {{ final_verification_query.response | length | default(0) }}"
+#       - "Test fabrics removed: {{ (pre_cleanup_query.response | length | default(0)) - (final_verification_query.response | length | default(0)) }}"
+#       - "Cleanup successful: {{ cleanup_result.changed | default(false) or final_cleanup_result.changed | default(false) }}"
+#       - "Environment ready for next test run"

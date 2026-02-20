@@ -1,0 +1,375 @@
+---
+# Test Variables for nd_manage_fabric module
+test_fabric_prefix: "test-fabric"
+test_fabric_domain: "all"
+
+# Basic fabric configuration
+basic_fabric_config:
+  name: "{{ test_fabric_prefix }}-basic"
+  category: fabric
+  security_domain: "{{ test_fabric_domain }}"
+  management:
+    type: vxlanIbgp
+    bgp_asn: "65000"
+    anycast_gateway_mac: "2020.0000.00aa"
+    replication_mode: multicast
+
+# Advanced fabric configuration with comprehensive settings
+advanced_fabric_config:
+  name: "{{ test_fabric_prefix }}-advanced"
+  category: fabric
+  security_domain: all
+  alert_suspend: disabled
+  location:
+    latitude: 37.7749
+    longitude: -122.4194
+  management:
+    type: vxlanIbgp
+    bgp_asn: "65001"
+    anycast_gateway_mac: "2020.0000.00ab"
+    replication_mode: multicast
+    # VRF Lite settings
+    vrf_lite_auto_config: manual
+    # BGP settings
+    # bgp_authentication: true
+    # bgp_authentication_key_type: 3des
+    bgp_loopback_id: 0
+    bgp_loopback_ip_range: "10.2.0.0/22"
+    auto_bgp_neighbor_description: true
+    # Interface settings
+    fabric_interface_type: p2p
+    fabric_mtu: 9216
+    l2_host_interface_mtu: 9216
+    target_subnet_mask: 30
+    intra_fabric_subnet_range: "10.4.0.0/16"
+    static_underlay_ip_allocation: false
+    # Routing protocol settings
+    link_state_routing_protocol: ospf
+    link_state_routing_tag: UNDERLAY
+    ospf_area_id: "0.0.0.0"
+    ospf_authentication: false
+    # ISIS settings
+    isis_level: level-2
+    isis_area_number: "0001"
+    isis_authentication: false
+    mpls_isis_area_number: "0001"
+    # Overlay settings
+    overlay_mode: cli
+    route_reflector_count: 2
+    advertise_physical_ip: false
+    advertise_physical_ip_on_border: true
+    anycast_border_gateway_advertise_physical_ip: false
+    # VNI and VLAN ranges
+    l3_vni_range: "50000-59000"
+    l2_vni_range: "30000-49000"
+    vrf_vlan_range: "2000-2299"
+    network_vlan_range: "2300-2999"
+    service_network_vlan_range: "3000-3199"
+    # NVE settings
+    nve_loopback_id: 1
+    nve_loopback_ip_range: "10.3.0.0/22"
+    nve_hold_down_timer: 180
+    # IPv6 settings
+    underlay_ipv6: false
+    ipv6_link_local: true
+    ipv6_subnet_target_mask: 126
+    # VRF settings
+    vrf_template: Default_VRF_Universal
+    vrf_extension_template: Default_VRF_Extension_Universal
+    vrf_lite_subnet_range: "10.33.0.0/16"
+    vrf_lite_subnet_target_mask: 30
+    vrf_lite_ipv6_subnet_range: "fd00::a33:0/112"
+    vrf_lite_ipv6_subnet_target_mask: 126
+    vrf_lite_macsec: false
+    # Network settings
+    network_template: Default_Network_Universal
+    network_extension_template: Default_Network_Extension_Universal
+    brownfield_network_name_format: Auto_Net_VNI$$VNI$$_VLAN$$VLAN_ID$$
+    brownfield_skip_overlay_network_attachments: false
+    # Power and redundancy
+    power_redundancy_mode: redundant
+    heartbeat_interval: 190
+    # Multicast settings
+    rendezvous_point_mode: asm
+    rendezvous_point_count: 2
+    rendezvous_point_loopback_id: 254
+    anycast_rendezvous_point_ip_range: "10.254.254.0/24"
+    multicast_group_subnet: "239.1.1.0/25"
+    auto_generate_multicast_group_address: false
+    underlay_multicast_group_address_limit: 128
+    tenant_routed_multicast: false
+    tenant_routed_multicast_ipv6: false
+    # vPC settings
+    vpc_layer3_peer_router: true
+    vpc_peer_link_port_channel_id: "500"
+    vpc_peer_link_vlan: "3600"
+    vpc_peer_keep_alive_option: management
+    vpc_domain_id_range: "1-1000"
+    vpc_delay_restore_timer: 150
+    vpc_auto_recovery_timer: 360
+    vpc_tor_delay_restore_timer: 30
+    vpc_ipv6_neighbor_discovery_sync: true
+    vpc_peer_link_enable_native_vlan: false
+    fabric_vpc_qos: false
+    fabric_vpc_qos_policy_name: spine_qos_for_fabric_vpc_peering
+    fabric_vpc_domain_id: false
+    # STP settings
+    stp_root_option: unmanaged
+    allow_vlan_on_leaf_tor_pairing: none
+    # BFD settings
+    bfd: false
+    bfd_pim: false
+    bfd_isis: false
+    bfd_ospf: false
+    bfd_ibgp: false
+    bfd_authentication: false
+    # Security settings
+    security_group_tag: false
+    macsec: false
+    pim_hello_authentication: false
+    # Timing and protocols
+    ptp: false
+    # Management and monitoring
+    real_time_backup: true
+    scheduled_backup: true
+    scheduled_backup_time: "21:38"
+    real_time_interface_statistics_collection: false
+    performance_monitoring: false
+    strict_config_compliance_mode: false
+    # QoS settings
+    default_queuing_policy: false
+    default_queuing_policy_other: queuing_policy_default_other
+    default_queuing_policy_cloudscale: queuing_policy_default_8q_cloudscale
+    default_queuing_policy_r_series: queuing_policy_default_r_series
+    aiml_qos: false
+    aiml_qos_policy: 400G
+    # System settings
+    site_id: "4225625065"
+    # DHCP and AAA
+    tenant_dhcp: true
+    local_dhcp_server: false
+    aaa: false
+    # Protocol settings
+    cdp: false
+    nxapi: false
+    nxapi_http: true
+    nxapi_http_port: 80
+    nxapi_https_port: 443
+    snmp_trap: true
+    # Advanced features
+    policy_based_routing: false
+    tcam_allocation: true
+    l3_vni_no_vlan_default_option: false
+    host_interface_admin_state: true
+    private_vlan: false
+    leaf_to_r_id_range: false
+    # Bootstrap and OAM
+    day0_bootstrap: false
+    bootstrap_multi_subnet: "#Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway, Scope_Subnet_Prefix"
+    next_generation_oam: true
+    ngoam_south_bound_loop_detect: false
+    greenfield_debug_flag: disable
+    # MPLS and management
+    mpls_handoff: false
+    inband_management: false
+    advanced_ssh_option: false
+    # CoPP policy
+    copp_policy: strict
+    # VLAN and interface ranges
+    sub_interface_dot1q_range: "2-511"
+    object_tracking_number_range: "100-299"
+    route_map_sequence_number_range: "1-65534"
+    ip_service_level_agreement_id_range: "10000-19999"
+    # Server collections
+    ntp_server_collection: ["10.1.1.1", "10.1.1.2"]
+    ntp_server_vrf_collection: ["management", "default"]
+    dns_collection: ["8.8.8.8", "8.8.4.4"]
+    dns_vrf_collection: ["management", "default"]
+    syslog_server_collection: ["10.1.1.10"]
+    syslog_server_vrf_collection: ["management"]
+    syslog_severity_collection: ["6"]
+    # Extra configuration sections
+    extra_config_leaf: ""
+    extra_config_spine: ""
+    extra_config_tor: ""
+    extra_config_aaa: ""
+    extra_config_intra_fabric_links: ""
+    pre_interface_config_leaf: ""
+    pre_interface_config_spine: ""
+    pre_interface_config_tor: ""
+
+# AI/ML optimized fabric configuration
+aiml_fabric_config:
+  name: "{{ test_fabric_prefix }}-aiml"
+  category: fabric
+  security_domain: all
+  management:
+    type: aimlVxlanIbgp
+    bgp_asn: "65100"
+    anycast_gateway_mac: "2020.0000.00ac"
+    replication_mode: multicast
+    fabric_interface_type: p2p
+    fabric_mtu: 9216
+    l2_host_interface_mtu: 9216
+    aiml_qos: true
+    aiml_qos_policy: 800G
+    # Not sure how to enable this in the GUI
+    default_queuing_policy: false
+    # Cannot be true when replication_mode is ingress
+    tenant_routed_multicast: true
+    security_group_tag: true
+    performance_monitoring: true
+
+# eBGP fabric configuration
+ebgp_fabric_config:
+  name: "{{ test_fabric_prefix }}-ebgp"
+  category: fabric
+  security_domain: all
+  management:
+    type: vxlanEbgp
+    bgp_asn: "65200"
+    anycast_gateway_mac: "2020.0000.00ad"
+    replication_mode: ingress
+    fabric_interface_type: unNumbered
+    link_state_routing_protocol: is-is
+    isis_level: level-1
+    overlay_mode: configProfile
+    power_redundancy_mode: combined
+
+# Campus fabric configuration
+campus_fabric_config:
+  name: "{{ test_fabric_prefix }}-campus"
+  category: fabric
+  security_domain: all
+  management:
+    type: vxlanCampus
+    bgp_asn: "65300"
+    anycast_gateway_mac: "2020.0000.00ae"
+    replication_mode: multicast
+    stp_root_option: rpvst+
+    vpc_peer_keep_alive_option: loopback
+    allow_vlan_on_leaf_tor_pairing: all
+
+# External connectivity fabric
+external_fabric_config:
+  name: "{{ test_fabric_prefix }}-external"
+  category: fabric
+  security_domain: all
+  management:
+    type: externalConnectivity
+    bgp_asn: "65400"
+    anycast_gateway_mac: "2020.0000.00af"
+    replication_mode: multicast
+    vrf_lite_auto_config: back2Back&ToExternal
+
+# Test fabric names for cleanup
+test_fabric_names:
+  - "{{ test_fabric_prefix }}-basic"
+  - "{{ test_fabric_prefix }}-advanced"
+  - "{{ test_fabric_prefix }}-aiml"
+  - "{{ test_fabric_prefix }}-ebgp"
+  - "{{ test_fabric_prefix }}-campus"
+  - "{{ test_fabric_prefix }}-external"
+  - "{{ test_fabric_prefix }}-merged-update"
+  - "{{ test_fabric_prefix }}-replaced"
+  - "{{ test_fabric_prefix }}-override1"
+  - "{{ test_fabric_prefix }}-override2"
+
+# BGP ASN validation test cases
+bgp_asn_test_cases:
+  valid:
+    - "65000"
+    - "65535"
+    - "4200000000"
+    - "65000.123"
+  # Invalid cases would be tested for failure
+  invalid:
+    - ""
+    - "abc"
+    - "65536.65536"
+
+# MAC address validation test cases
+mac_test_cases:
+  valid:
+    - "2020.0000.00aa"
+    - "ABCD.1234.5678"
+    - "ffff.ffff.ffff"
+  invalid:
+    - "20:20:00:00:00:aa"
+    - "202000000aa"
+    - "XXXX.YYYY.ZZZZ"
+
+# Enum test cases for various fields
+enum_test_cases:
+  fabric_types:
+    - vxlanIbgp
+    - vxlanEbgp
+    - vxlanCampus
+    - aimlVxlanIbgp
+    - aimlVxlanEbgp
+    - aimlRouted
+    - routed
+    - classicLan
+    - classicLanEnhanced
+    - ipfm
+    - ipfmEnhanced
+    - externalConnectivity
+    - vxlanExternal
+    - aci
+    - meta
+  
+  replication_modes:
+    - multicast
+    - ingress
+  
+  bgp_auth_types:
+    - 3des
+    - type6
+    - type7
+  
+  interface_types:
+    - p2p
+    - unNumbered
+  
+  routing_protocols:
+    - ospf
+    - is-is
+  
+  overlay_modes:
+    - configProfile
+    - cli
+  
+  power_modes:
+    - redundant
+    - combined
+    - inputSrcRedundant
+  
+  isis_levels:
+    - level-1
+    - level-2
+  
+  stp_options:
+    - rpvst+
+    - mst
+    - unmanaged
+  
+  vpc_keepalive_options:
+    - loopback
+    - management
+  
+  vlan_pairing_options:
+    - none
+    - all
+  
+  aiml_qos_policies:
+    - 800G
+    - 400G
+    - 100G
+    - 25G
+  
+  copp_policies:
+    - dense
+    - lenient
+    - moderate
+    - strict
+    - manual

@@ -1,0 +1,47 @@
+---
+# Main test tasks for nd_manage_fabric module
+# This file includes comprehensive tests covering all states and properties
+
+- name: Include test setup tasks
+  import_tasks: setup.yml
+  tags: [setup, always]
+
+- name: Include basic functionality tests
+  import_tasks: test_basic.yml
+  tags: [basic, test]
+
+- name: Include merged state tests
+  import_tasks: test_merged.yml
+  tags: [merged, test]
+
+- name: Include replaced state tests
+  import_tasks: test_replaced.yml
+  tags: [replaced, test]
+
+- name: Include overridden state tests
+  import_tasks: test_overridden.yml
+  tags: [overridden, test]
+
+- name: Include deleted state tests
+  import_tasks: test_deleted.yml
+  tags: [deleted, test]
+
+- name: Include comprehensive property tests
+  import_tasks: test_properties.yml
+  tags: [properties, test]
+
+- name: Include validation tests
+  import_tasks: test_validation.yml
+  tags: [validation, test]
+
+- name: Include enum tests
+  import_tasks: test_enums.yml
+  tags: [enums, test]
+
+- name: Include edge case tests
+  import_tasks: test_edge_cases.yml
+  tags: [edge_cases, test]
+
+- name: Include cleanup tasks
+  import_tasks: cleanup.yml
+  tags: [cleanup, always]

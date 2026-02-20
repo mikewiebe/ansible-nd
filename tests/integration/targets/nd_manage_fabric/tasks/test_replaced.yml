@@ -1,0 +1,199 @@
+---
+# Replaced state tests for nd_manage_fabric module
+# Tests complete configuration replacement
+
+- name: Test Replaced 1 - Replace basic fabric with advanced configuration
+  cisco.nd.nd_manage_fabric:
+    state: replaced
+    config:
+      - name: "{{ basic_fabric_config.name }}"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65555"
+          anycast_gateway_mac: "2020.0000.00ff"
+          replication_mode: ingress
+          fabric_interface_type: unNumbered
+          link_state_routing_protocol: is-is
+          isis_level: level-1
+          bfd: true
+          bfd_ibgp: true
+  register: replaced_test1_result
+
+- name: Verify Replaced Test 1 - Configuration replacement
+  assert:
+    that:
+      - replaced_test1_result is changed
+      - replaced_test1_result.response is defined
+    fail_msg: "Configuration replacement failed"
+    success_msg: "Configuration replaced successfully"
+
+- name: Test Replaced 2 - Query replaced fabric to verify changes
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics?name={{ basic_fabric_config.name }}
+  register: replaced_test2_result
+
+- name: Verify Replaced Test 2 - Replaced configuration
+  assert:
+    that:
+      - replaced_test2_result is not changed
+      - replaced_test2_result.jsondata is defined
+      - replaced_test2_result.jsondata | length == 1
+    fail_msg: "Replaced configuration verification failed"
+    success_msg: "Replaced configuration verified"
+
+- name: Test Replaced 3 - Replace with comprehensive fabric configuration
+  cisco.nd.nd_manage_fabric:
+    state: replaced
+    config:
+      - name: "{{ test_fabric_prefix }}-replaced"
+        category: fabric
+        security_domain: all
+        alert_suspend: disabled
+        location:
+          latitude: 51.5074
+          longitude: -0.1278
+        management:
+          type: aimlVxlanEbgp
+          bgp_asn: "65777"
+          anycast_gateway_mac: "2020.0000.00cc"
+          replication_mode: multicast
+          # Comprehensive replacement configuration
+          fabric_interface_type: p2p
+          fabric_mtu: 9000
+          l2_host_interface_mtu: 9000
+          link_state_routing_protocol: ospf
+          ospf_area_id: "0.0.0.1"
+          overlay_mode: configProfile
+          power_redundancy_mode: inputSrcRedundant
+          rendezvous_point_mode: bidir
+          isis_level: level-2
+          stp_root_option: mst
+          vpc_peer_keep_alive_option: loopback
+          allow_vlan_on_leaf_tor_pairing: all
+          aiml_qos: true
+          aiml_qos_policy: 25G
+          copp_policy: lenient
+          # Network ranges
+          l3_vni_range: "60000-69000"
+          l2_vni_range: "40000-59000"
+          vrf_vlan_range: "3000-3299"
+          network_vlan_range: "3300-3999"
+          # VPC settings
+          vpc_layer3_peer_router: false
+          vpc_peer_link_port_channel_id: "600"
+          vpc_peer_link_vlan: "3700"
+          vpc_delay_restore_timer: 200
+          # BFD settings
+          bfd: true
+          bfd_pim: true
+          bfd_isis: true
+          bfd_ospf: true
+          bfd_ibgp: true
+          # Security
+          security_group_tag: true
+          macsec: true
+          # Monitoring
+          performance_monitoring: true
+          real_time_interface_statistics_collection: true
+          strict_config_compliance_mode: true
+  register: replaced_test3_result
+
+- name: Verify Replaced Test 3 - Comprehensive replacement
+  assert:
+    that:
+      - replaced_test3_result is changed
+      - replaced_test3_result.response is defined
+    fail_msg: "Comprehensive replacement failed"
+    success_msg: "Comprehensive replacement successful"
+
+- name: Test Replaced 4 - Idempotency check on replaced configuration
+  cisco.nd.nd_manage_fabric:
+    state: replaced
+    config:
+      - name: "{{ test_fabric_prefix }}-replaced"
+        category: fabric
+        security_domain: all
+        alert_suspend: disabled
+        location:
+          latitude: 51.5074
+          longitude: -0.1278
+        management:
+          type: aimlVxlanEbgp
+          bgp_asn: "65777"
+          anycast_gateway_mac: "2020.0000.00cc"
+          replication_mode: multicast
+          fabric_interface_type: p2p
+          fabric_mtu: 9000
+          l2_host_interface_mtu: 9000
+          link_state_routing_protocol: ospf
+          ospf_area_id: "0.0.0.1"
+          overlay_mode: configProfile
+          power_redundancy_mode: inputSrcRedundant
+          rendezvous_point_mode: bidir
+          isis_level: level-2
+          stp_root_option: mst
+          vpc_peer_keep_alive_option: loopback
+          allow_vlan_on_leaf_tor_pairing: all
+          aiml_qos: true
+          aiml_qos_policy: 25G
+          copp_policy: lenient
+          l3_vni_range: "60000-69000"
+          l2_vni_range: "40000-59000"
+          vrf_vlan_range: "3000-3299"
+          network_vlan_range: "3300-3999"
+          vpc_layer3_peer_router: false
+          vpc_peer_link_port_channel_id: "600"
+          vpc_peer_link_vlan: "3700"
+          vpc_delay_restore_timer: 200
+          bfd: true
+          bfd_pim: true
+          bfd_isis: true
+          bfd_ospf: true
+          bfd_ibgp: true
+          security_group_tag: true
+          macsec: true
+          performance_monitoring: true
+          real_time_interface_statistics_collection: true
+          strict_config_compliance_mode: true
+  register: replaced_test4_result
+
+- name: Verify Replaced Test 4 - Idempotency on replaced config
+  assert:
+    that:
+      - replaced_test4_result is not changed
+    fail_msg: "Replaced idempotency test failed"
+    success_msg: "Replaced idempotency test passed"
+
+- name: Test Replaced 5 - Replace with different fabric type
+  cisco.nd.nd_manage_fabric:
+    state: replaced
+    config:
+      - name: "{{ aiml_fabric_config.name }}"
+        category: fabric
+        security_domain: all
+        management:
+          type: classicLan
+          bgp_asn: "65123"
+          anycast_gateway_mac: "2020.0000.00dd"
+          replication_mode: multicast
+          stp_root_option: rpvst+
+          cdp: true
+          snmp_trap: false
+  register: replaced_test5_result
+
+- name: Verify Replaced Test 5 - Fabric type change
+  assert:
+    that:
+      - replaced_test5_result is changed
+    fail_msg: "Fabric type replacement failed"
+    success_msg: "Fabric type replaced successfully"
+
+- name: Display replaced test results summary
+  debug:
+    msg:
+      - "Replaced state tests completed"
+      - "All replaced tests executed successfully"
+      - "Configurations completely replaced for multiple fabrics"

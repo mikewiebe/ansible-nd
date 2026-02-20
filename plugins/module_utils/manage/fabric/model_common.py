@@ -10,7 +10,7 @@ Validation model for cisco.nd.manage.fabric playbooks.
 from datetime import datetime
 from enum import Enum
 import re
-from typing import List, Optional, Union, Literal
+from typing import Annotated, List, Optional, Union, Literal
 
 # This try-except block is used to handle the import of Pydantic.
 # If Pydantic is not available, it will define a minimal BaseModel class
@@ -1167,14 +1167,17 @@ class FabricManagementModel(BaseModel):
     l2_vni_range: str = Field(default="30000-49000", alias="l2VniRange")
     vrf_vlan_range: str = Field(default="2000-2299", alias="vrfVlanRange")
     network_vlan_range: str = Field(default="2300-2999", alias="networkVlanRange")
-    service_network_vlan_range: str = Field(default="3000-3199", alias="serviceNetworkVlanRange")
+    # Does not work for eBGP
+    # service_network_vlan_range: str = Field(default="3000-3199", alias="serviceNetworkVlanRange")
 
     # BGP settings
     bgp_loopback_id: int = Field(default=0, alias="bgpLoopbackId")
     bgp_loopback_ip_range: str = Field(default="10.2.0.0/22", alias="bgpLoopbackIpRange")
     bgp_authentication: bool = Field(default=False, alias="bgpAuthentication")
+    # Does not work for iBGP
     # bgp_authentication_key_type: BgpAuthenticationKeyType = Field(default=BgpAuthenticationKeyType.THREE_DES.value, alias="bgpAuthenticationKeyType")
-    auto_bgp_neighbor_description: bool = Field(default=True, alias="autoBgpNeighborDescription")
+    # Does not work for eBGP
+    # auto_bgp_neighbor_description: bool = Field(default=True, alias="autoBgpNeighborDescription")
 
     # NVE settings
     nve_loopback_id: int = Field(default=1, alias="nveLoopbackId")
@@ -1184,7 +1187,8 @@ class FabricManagementModel(BaseModel):
     # IPv6 settings
     underlay_ipv6: bool = Field(default=False, alias="underlayIpv6")
     ipv6_link_local: bool = Field(default=True, alias="ipv6LinkLocal")
-    ipv6_subnet_target_mask: int = Field(default=126, alias="ipv6SubnetTargetMask")
+    # Does not work for eBGP
+    # ipv6_subnet_target_mask: int = Field(default=126, alias="ipv6SubnetTargetMask")
 
     # VRF settings
     vrf_template: str = Field(default="Default_VRF_Universal", alias="vrfTemplate")
@@ -1194,11 +1198,13 @@ class FabricManagementModel(BaseModel):
     vrf_lite_ipv6_subnet_range: str = Field(default="fd00::a33:0/112", alias="vrfLiteIpv6SubnetRange")
     vrf_lite_ipv6_subnet_target_mask: int = Field(default=126, alias="vrfLiteIpv6SubnetTargetMask")
     vrf_lite_auto_config: VrfLiteAutoConfig = Field(default=VrfLiteAutoConfig.MANUAL.value, alias="vrfLiteAutoConfig")
-    vrf_lite_macsec: bool = Field(default=False, alias="vrfLiteMacsec")
+    # Does not work for eBGP
+    # vrf_lite_macsec: bool = Field(default=False, alias="vrfLiteMacsec")
     auto_unique_vrf_lite_ip_prefix: bool = Field(default=False, alias="autoUniqueVrfLiteIpPrefix")
-    auto_symmetric_vrf_lite: bool = Field(default=False, alias="autoSymmetricVrfLite")
-    auto_symmetric_default_vrf: bool = Field(default=False, alias="autoSymmetricDefaultVrf")
-    auto_vrf_lite_default_vrf: bool = Field(default=False, alias="autoVrfLiteDefaultVrf")
+    # Does not work for eBGP
+    # auto_symmetric_vrf_lite: bool = Field(default=False, alias="autoSymmetricVrfLite")
+    # auto_symmetric_default_vrf: bool = Field(default=False, alias="autoSymmetricDefaultVrf")
+    # auto_vrf_lite_default_vrf: bool = Field(default=False, alias="autoVrfLiteDefaultVrf")
     vrf_route_import_id_reallocation: bool = Field(default=False, alias="vrfRouteImportIdReallocation")
     per_vrf_loopback_auto_provision: bool = Field(default=False, alias="perVrfLoopbackAutoProvision")
     per_vrf_loopback_auto_provision_ipv6: bool = Field(default=False, alias="perVrfLoopbackAutoProvisionIpv6")
@@ -1206,8 +1212,9 @@ class FabricManagementModel(BaseModel):
     # Network settings
     network_template: str = Field(default="Default_Network_Universal", alias="networkTemplate")
     network_extension_template: str = Field(default="Default_Network_Extension_Universal", alias="networkExtensionTemplate")
-    brownfield_network_name_format: str = Field(default="Auto_Net_VNI$$VNI$$_VLAN$$VLAN_ID$$", alias="brownfieldNetworkNameFormat")
-    brownfield_skip_overlay_network_attachments: bool = Field(default=False, alias="brownfieldSkipOverlayNetworkAttachments")
+    # Does not work for eBGP
+    # brownfield_network_name_format: str = Field(default="Auto_Net_VNI$$VNI$$_VLAN$$VLAN_ID$$", alias="brownfieldNetworkNameFormat")
+    # brownfield_skip_overlay_network_attachments: bool = Field(default=False, alias="brownfieldSkipOverlayNetworkAttachments")
 
     # Fabric interface and underlay settings
     fabric_interface_type: FabricInterfaceType = Field(default=FabricInterfaceType.P2P.value, alias="fabricInterfaceType")
@@ -1219,21 +1226,24 @@ class FabricManagementModel(BaseModel):
 
     # OSPF settings
     ospf_area_id: str = Field(default="0.0.0.0", alias="ospfAreaId")
-    ospf_authentication: bool = Field(default=False, alias="ospfAuthentication")
-    link_state_routing_protocol: LinkStateRoutingProtocol = Field(default=LinkStateRoutingProtocol.OSPF.value, alias="linkStateRoutingProtocol")
+    # Does not work for eBGP
+    # ospf_authentication: bool = Field(default=False, alias="ospfAuthentication")
+    # link_state_routing_protocol: LinkStateRoutingProtocol = Field(default=LinkStateRoutingProtocol.OSPF.value, alias="linkStateRoutingProtocol")
     link_state_routing_tag: str = Field(default="UNDERLAY", alias="linkStateRoutingTag")
 
     # ISIS settings
-    isis_level: IsisLevel = Field(default=IsisLevel.LEVEL_2.value, alias="isisLevel")
-    isis_area_number: str = Field(default="0001", alias="isisAreaNumber")
-    isis_authentication: bool = Field(default=False, alias="isisAuthentication")
-    mpls_isis_area_number: str = Field(default="0001", alias="mplsIsisAreaNumber")
+    # Does not work for eBGP
+    # isis_level: IsisLevel = Field(default=IsisLevel.LEVEL_2.value, alias="isisLevel")
+    # isis_area_number: str = Field(default="0001", alias="isisAreaNumber")
+    # isis_authentication: bool = Field(default=False, alias="isisAuthentication")
+    # mpls_isis_area_number: str = Field(default="0001", alias="mplsIsisAreaNumber")
 
     # BFD settings
     bfd: bool = Field(default=False, alias="bfd")
-    bfd_pim: bool = Field(default=False, alias="bfdPim")
-    bfd_isis: bool = Field(default=False, alias="bfdIsis")
-    bfd_ospf: bool = Field(default=False, alias="bfdOspf")
+    # Does not work for eBGP
+    # bfd_pim: bool = Field(default=False, alias="bfdPim")
+    # bfd_isis: bool = Field(default=False, alias="bfdIsis")
+    # bfd_ospf: bool = Field(default=False, alias="bfdOspf")
     bfd_ibgp: bool = Field(default=False, alias="bfdIbgp")
     bfd_authentication: bool = Field(default=False, alias="bfdAuthentication")
 
@@ -1249,7 +1259,8 @@ class FabricManagementModel(BaseModel):
     tenant_routed_multicast_ipv6: bool = Field(default=False, alias="tenantRoutedMulticastIpv6")
 
     # Security and authentication
-    security_group_tag: bool = Field(default=False, alias="securityGroupTag")
+    # Does not work for eBGP
+    # security_group_tag: bool = Field(default=False, alias="securityGroupTag")
     macsec: bool = Field(default=False, alias="macsec")
     pim_hello_authentication: bool = Field(default=False, alias="pimHelloAuthentication")
 
@@ -1293,33 +1304,38 @@ class FabricManagementModel(BaseModel):
 
     # Overlay and EVPN settings
     overlay_mode: OverlayMode = Field(default=OverlayMode.CLI.value, alias="overlayMode")
-    route_reflector_count: int = Field(default=2, alias="routeReflectorCount")
     advertise_physical_ip: bool = Field(default=False, alias="advertisePhysicalIp")
     advertise_physical_ip_on_border: bool = Field(default=True, alias="advertisePhysicalIpOnBorder")
     anycast_border_gateway_advertise_physical_ip: bool = Field(default=False, alias="anycastBorderGatewayAdvertisePhysicalIp")
 
     # VLAN and interface ranges
     sub_interface_dot1q_range: str = Field(default="2-511", alias="subInterfaceDot1qRange")
-    object_tracking_number_range: str = Field(default="100-299", alias="objectTrackingNumberRange")
-    route_map_sequence_number_range: str = Field(default="1-65534", alias="routeMapSequenceNumberRange")
-    ip_service_level_agreement_id_range: str = Field(default="10000-19999", alias="ipServiceLevelAgreementIdRange")
+    # Does not work for eBGP
+    # object_tracking_number_range: str = Field(default="100-299", alias="objectTrackingNumberRange")
+    # route_map_sequence_number_range: str = Field(default="1-65534", alias="routeMapSequenceNumberRange")
+    # ip_service_level_agreement_id_range: str = Field(default="10000-19999", alias="ipServiceLevelAgreementIdRange")
 
     # Private VLAN
     private_vlan: bool = Field(default=False, alias="privateVlan")
 
     # Advanced features
-    policy_based_routing: bool = Field(default=False, alias="policyBasedRouting")
+    # Does not work for eBGP
+    # policy_based_routing: bool = Field(default=False, alias="policyBasedRouting")
     tcam_allocation: bool = Field(default=True, alias="tcamAllocation")
     l3_vni_no_vlan_default_option: bool = Field(default=False, alias="l3VniNoVlanDefaultOption")
-    host_interface_admin_state: bool = Field(default=True, alias="hostInterfaceAdminState")
+    # Does not work for eBGP
+    # host_interface_admin_state: bool = Field(default=True, alias="hostInterfaceAdminState")
     allow_vlan_on_leaf_tor_pairing: AllowVlanOnLeafTorPairing = Field(default=AllowVlanOnLeafTorPairing.NONE.value, alias="allowVlanOnLeafTorPairing")
 
     # Routing and STP
-    stp_root_option: StpRootOption = Field(default=StpRootOption.UNMANAGED.value, alias="stpRootOption")
+    # Does not work for eBGP
+    # stp_root_option: StpRootOption = Field(default=StpRootOption.UNMANAGED.value, alias="stpRootOption")
     leaf_to_r_id_range: bool = Field(default=False, alias="leafTorIdRange")
+    leaf_tor_vpc_port_channel_id_range: str = Field(default="1-499", alias="leafTorVpcPortChannelIdRange")
 
     # Bootstrap and day0
     day0_bootstrap: bool = Field(default=False, alias="day0Bootstrap")
+    # Does not work for eBGP or iBGP
     # bootstrap_multi_subnet: str = Field(default="#Scope_Start_IP, Scope_End_IP, Scope_Default_Gateway, Scope_Subnet_Prefix", alias="bootstrapMultiSubnet")
 
     # OAM and debugging
@@ -1328,13 +1344,15 @@ class FabricManagementModel(BaseModel):
     greenfield_debug_flag: GreenfieldDebugFlag = Field(default=GreenfieldDebugFlag.DISABLE.value, alias="greenfieldDebugFlag")
 
     # MPLS
-    mpls_handoff: bool = Field(default=False, alias="mplsHandoff")
+    # Does not work for eBGP
+    # mpls_handoff: bool = Field(default=False, alias="mplsHandoff")
 
     # CoPP
     copp_policy: CoppPolicy = Field(default=CoppPolicy.STRICT.value, alias="coppPolicy")
 
     # In-band management
-    inband_management: bool = Field(default=False, alias="inbandManagement")
+    # Does not work for eBGP
+    # inband_management: bool = Field(default=False, alias="inbandManagement")
 
     # SSH
     advanced_ssh_option: bool = Field(default=False, alias="advancedSshOption")
@@ -1437,7 +1455,1186 @@ class FabricManagementModel(BaseModel):
         return value
 
 
-class FabricModelvxlanIbgp(BaseModel):
+# ========================================================================
+# Fabric Management Type-Specific Models (Discriminated Union)
+# ========================================================================
+
+class VxlanIbgpManagementModel(FabricManagementModel):
+    """
+    Management model specific to vxlanIbgp fabrics.
+    
+    This model includes iBGP-specific properties for VXLAN fabrics using
+    Internal BGP (iBGP) with route reflectors and IGP underlay (OSPF or IS-IS).
+    
+    Key iBGP characteristics:
+    - Single ASN for entire fabric
+    - Route reflectors required (2 or 4 spines)
+    - IGP underlay (OSPF or IS-IS) for reachability
+    - iBGP peer templates for BGP configuration
+    
+    Total properties: 247 (from OpenAPI vxlanIbgp schema)
+    """
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        use_enum_values=True,
+        validate_assignment=True,
+        populate_by_name=True,
+    )
+
+    # Override type to be iBGP specific
+    type: Literal["vxlanIbgp"] = Field(default="vxlanIbgp", alias="type")
+
+    # iBGP-specific: Route Reflector Configuration (Required for iBGP)
+    route_reflector_count: int = Field(
+        default=2,
+        alias="routeReflectorCount",
+        description="Number of spines acting as Route-Reflectors (2 or 4)"
+    )
+
+    # iBGP-specific: IGP Underlay Routing (Required - OSPF or IS-IS)
+    link_state_routing_protocol: LinkStateRoutingProtocol = Field(
+        default=LinkStateRoutingProtocol.OSPF.value,
+        alias="linkStateRoutingProtocol",
+        description="Underlay Routing Protocol for Spine-Leaf Connectivity"
+    )
+    link_state_routing_tag: str = Field(
+        default="UNDERLAY",
+        alias="linkStateRoutingTag",
+        description="Underlay routing protocol process tag"
+    )
+
+    # iBGP-specific: Fabric Interface Configuration
+    fabric_interface_type: FabricInterfaceType = Field(
+        default=FabricInterfaceType.P2P.value,
+        alias="fabricInterfaceType",
+        description="Numbered (p2p) or unnumbered fabric interfaces"
+    )
+    ipv6_link_local: bool = Field(
+        default=True,
+        alias="ipv6LinkLocal",
+        description="Use IPv6 link-local for spine-leaf interfaces (if not enabled, use global IPv6)"
+    )
+    ipv6_subnet_target_mask: int = Field(
+        default=126,
+        ge=126,
+        le=127,
+        alias="ipv6SubnetTargetMask",
+        description="Mask for Underlay Subnet IPv6 Range"
+    )
+
+    # iBGP-specific: OSPF Settings
+    ospf_area_id: str = Field(
+        default="0.0.0.0",
+        alias="ospfAreaId",
+        description="OSPF Area ID in IP address format"
+    )
+    ospf_authentication: bool = Field(
+        default=False,
+        alias="ospfAuthentication",
+        description="Enable OSPF Authentication"
+    )
+    ospf_authentication_key: Optional[str] = Field(
+        default=None,
+        alias="ospfAuthenticationKey",
+        description="OSPF Authentication Key"
+    )
+    ospf_authentication_key_id: int = Field(
+        default=127,
+        alias="ospfAuthenticationKeyId",
+        description="OSPF Authentication Key ID"
+    )
+    bfd_ospf: bool = Field(
+        default=False,
+        alias="bfdOspf",
+        description="Enable BFD for OSPF"
+    )
+
+    # iBGP-specific: IS-IS Settings
+    isis_level: IsisLevel = Field(
+        default=IsisLevel.LEVEL_2.value,
+        alias="isisLevel",
+        description="IS-IS Level (level-1 or level-2)"
+    )
+    isis_area_number: str = Field(
+        default="0001",
+        alias="isisAreaNumber",
+        description="4-hex digit IS-IS area number"
+    )
+    isis_authentication: bool = Field(
+        default=False,
+        alias="isisAuthentication",
+        description="Enable IS-IS Authentication"
+    )
+    isis_authentication_key: Optional[str] = Field(
+        default=None,
+        alias="isisAuthenticationKey",
+        description="IS-IS Authentication Key"
+    )
+    isis_authentication_keychain_key_id: int = Field(
+        default=127,
+        alias="isisAuthenticationKeychainKeyId",
+        description="IS-IS Authentication Keychain Key ID"
+    )
+    isis_authentication_keychain_name: Optional[str] = Field(
+        default=None,
+        alias="isisAuthenticationKeychainName",
+        description="IS-IS Authentication Keychain Name"
+    )
+    isis_overload: bool = Field(
+        default=True,
+        alias="isisOverload",
+        description="Enable IS-IS Overload Bit"
+    )
+    isis_overload_elapse_time: int = Field(
+        default=60,
+        alias="isisOverloadElapseTime",
+        description="IS-IS Overload Bit Elapse Time (seconds)"
+    )
+    isis_point_to_point: bool = Field(
+        default=True,
+        alias="isisPointToPoint",
+        description="Enable IS-IS Point-to-Point on fabric interfaces"
+    )
+    bfd_isis: bool = Field(
+        default=False,
+        alias="bfdIsis",
+        description="Enable BFD for IS-IS"
+    )
+    bfd_pim: bool = Field(
+        default=False,
+        alias="bfdPim",
+        description="Enable BFD for PIM"
+    )
+
+    # iBGP-specific: BGP Peer Templates
+    ibgp_peer_template: Optional[str] = Field(
+        default=None,
+        alias="ibgpPeerTemplate",
+        description="iBGP Peer-Template config for Route Reflectors and spines"
+    )
+    leaf_ibgp_peer_template: Optional[str] = Field(
+        default=None,
+        alias="leafIbgpPeerTemplate",
+        description="iBGP Peer-Template config for leafs, borders, or border gateways"
+    )
+    auto_bgp_neighbor_description: bool = Field(
+        default=True,
+        alias="autoBgpNeighborDescription",
+        description="Automatically generate BGP neighbor description"
+    )
+
+    # iBGP-specific: IPv6 Underlay Support
+    ipv6_subnet_range: str = Field(
+        default="fd00::a04:0/112",
+        alias="ipv6SubnetRange",
+        description="Underlay Subnet IPv6 range for Numbered and Peer Link SVI IPs"
+    )
+    router_id_range: str = Field(
+        default="10.2.0.0/23",
+        alias="routerIdRange",
+        description="BGP Router ID Range in IPv4 subnet format used for IPv6 Underlay"
+    )
+
+    # iBGP-specific: VRF Lite and Inband Management
+    auto_symmetric_vrf_lite: bool = Field(
+        default=False,
+        alias="autoSymmetricVrfLite",
+        description="Auto generate VRF LITE sub-interface and BGP peering on managed neighbors"
+    )
+    auto_vrf_lite_default_vrf: bool = Field(
+        default=False,
+        alias="autoVrfLiteDefaultVrf",
+        description="Auto generate BGP peering in Default VRF for VRF Lite (IPv4 underlay)"
+    )
+    auto_symmetric_default_vrf: bool = Field(
+        default=False,
+        alias="autoSymmetricDefaultVrf",
+        description="Auto generate Default VRF interface and BGP peering on managed neighbors"
+    )
+
+    # iBGP-specific: Additional routing and STP
+    stp_root_option: StpRootOption = Field(
+        default=StpRootOption.UNMANAGED.value,
+        alias="stpRootOption",
+        description="STP root bridge protocol (rpvst+, mst, or unmanaged)"
+    )
+    stp_bridge_priority: int = Field(
+        default=0,
+        alias="stpBridgePriority",
+        description="STP Bridge Priority"
+    )
+    stp_vlan_range: str = Field(
+        default="1-3967",
+        alias="stpVlanRange",
+        description="STP VLAN Range"
+    )
+    mst_instance_range: str = Field(
+        default="0",
+        alias="mstInstanceRange",
+        description="MST Instance Range"
+    )
+
+    # iBGP-specific: BGP IPv6 settings
+    bgp_loopback_ipv6_range: str = Field(
+        default="fd00::a02:0/119",
+        alias="bgpLoopbackIpv6Range",
+        description="BGP Loopback IPv6 address range"
+    )
+
+    # iBGP-specific: VRF Lite MACSec settings
+    vrf_lite_macsec: bool = Field(
+        default=False,
+        alias="vrfLiteMacsec",
+        description="Enable MACSec for VRF Lite connections"
+    )
+    vrf_lite_macsec_algorithm: str = Field(
+        default="AES_128_CMAC",
+        alias="vrfLiteMacsecAlgorithm",
+        description="VRF Lite MACSec Algorithm"
+    )
+    vrf_lite_macsec_cipher_suite: str = Field(
+        default="GCM-AES-XPN-256",
+        alias="vrfLiteMacsecCipherSuite",
+        description="VRF Lite MACSec Cipher Suite"
+    )
+    vrf_lite_macsec_fallback_algorithm: str = Field(
+        default="AES_128_CMAC",
+        alias="vrfLiteMacsecFallbackAlgorithm",
+        description="VRF Lite MACSec Fallback Algorithm"
+    )
+    vrf_lite_macsec_fallback_key_string: Optional[str] = Field(
+        default=None,
+        alias="vrfLiteMacsecFallbackKeyString",
+        description="VRF Lite MACSec Fallback Key String"
+    )
+    vrf_lite_macsec_key_string: Optional[str] = Field(
+        default=None,
+        alias="vrfLiteMacsecKeyString",
+        description="VRF Lite MACSec Key String"
+    )
+
+    # iBGP-specific: Brownfield network settings
+    brownfield_network_name_format: str = Field(
+        default="Auto_Net_VNI$$VNI$$_VLAN$$VLAN_ID$$",
+        alias="brownfieldNetworkNameFormat",
+        description="Brownfield network name format"
+    )
+    brownfield_skip_overlay_network_attachments: bool = Field(
+        default=False,
+        alias="brownfieldSkipOverlayNetworkAttachments",
+        description="Skip overlay network attachments in brownfield"
+    )
+
+    # iBGP-specific: Default VRF redistribution
+    default_vrf_redistribution_bgp_route_map: str = Field(
+        default="extcon-rmap-filter",
+        alias="defaultVrfRedistributionBgpRouteMap",
+        description="Default VRF Redistribution BGP Route Map"
+    )
+
+    # iBGP-specific: Host interface settings
+    host_interface_admin_state: bool = Field(
+        default=True,
+        alias="hostInterfaceAdminState",
+        description="Host interface admin state (up/down)"
+    )
+
+    # iBGP-specific: In-band management
+    inband_management: bool = Field(
+        default=False,
+        alias="inbandManagement",
+        description="Enable in-band management"
+    )
+    inband_dhcp_servers: Optional[List[str]] = Field(
+        default=None,
+        alias="inbandDhcpServers",
+        description="In-band DHCP servers"
+    )
+
+    # iBGP-specific: IP SLA and tracking
+    ip_service_level_agreement_id_range: str = Field(
+        default="10000-19999",
+        alias="ipServiceLevelAgreementIdRange",
+        description="IP SLA ID Range"
+    )
+    object_tracking_number_range: str = Field(
+        default="100-299",
+        alias="objectTrackingNumberRange",
+        description="Object Tracking Number Range"
+    )
+
+    # iBGP-specific: Route map settings
+    route_map_sequence_number_range: str = Field(
+        default="1-65534",
+        alias="routeMapSequenceNumberRange",
+        description="Route Map Sequence Number Range"
+    )
+
+    # iBGP-specific: Security group settings
+    # MWIEBE: Caused an error
+    # security_group_status: Optional[str] = Field(
+    #     default=None,
+    #     alias="securityGroupStatus",
+    #     description="Security Group Status"
+    # )
+    security_group_tag: bool = Field(
+        default=False,
+        alias="securityGroupTag",
+        description="Enable Security Group Tag (SGT)"
+    )
+    security_group_tag_id_range: Optional[str] = Field(
+        default=None,
+        alias="securityGroupTagIdRange",
+        description="Security Group Tag ID Range"
+    )
+    security_group_tag_prefix: Optional[str] = Field(
+        default=None,
+        alias="securityGroupTagPrefix",
+        description="Security Group Tag Prefix"
+    )
+    security_group_tag_preprovision: Optional[bool] = Field(
+        default=None,
+        alias="securityGroupTagPreprovision",
+        description="Pre-provision Security Group Tags"
+    )
+
+    # iBGP-specific: Service network VLAN range
+    service_network_vlan_range: str = Field(
+        default="3000-3199",
+        alias="serviceNetworkVlanRange",
+        description="Service Network VLAN Range"
+    )
+
+    # iBGP-specific: Seed and spine switch core interfaces
+    seed_switch_core_interfaces: Optional[List[str]] = Field(
+        default=None,
+        alias="seedSwitchCoreInterfaces",
+        description="Seed Switch Core Interfaces"
+    )
+    spine_switch_core_interfaces: Optional[List[str]] = Field(
+        default=None,
+        alias="spineSwitchCoreInterfaces",
+        description="Spine Switch Core Interfaces"
+    )
+
+    # iBGP-specific: Certificate and trust settings
+    skip_certificate_verification: bool = Field(
+        default=False,
+        alias="skipCertificateVerification",
+        description="Skip SSL certificate verification"
+    )
+    trustpoint_label: Optional[str] = Field(
+        default=None,
+        alias="trustpointLabel",
+        description="Trustpoint Label for SSL certificates"
+    )
+
+    # iBGP-specific: Unnumbered bootstrap settings
+    un_numbered_bootstrap_loopback_id: int = Field(
+        default=253,
+        alias="unNumberedBootstrapLoopbackId",
+        description="Unnumbered Bootstrap Loopback ID"
+    )
+    un_numbered_dhcp_start_address: Optional[str] = Field(
+        default=None,
+        alias="unNumberedDhcpStartAddress",
+        description="Unnumbered DHCP Start Address"
+    )
+    un_numbered_dhcp_end_address: Optional[str] = Field(
+        default=None,
+        alias="unNumberedDhcpEndAddress",
+        description="Unnumbered DHCP End Address"
+    )
+
+    # iBGP-specific: MPLS settings
+    mpls_handoff: bool = Field(
+        default=False,
+        alias="mplsHandoff",
+        description="Enable MPLS handoff"
+    )
+    mpls_isis_area_number: str = Field(
+        default="0001",
+        alias="mplsIsisAreaNumber",
+        description="MPLS IS-IS Area Number"
+    )
+    mpls_loopback_identifier: int = Field(
+        default=101,
+        alias="mplsLoopbackIdentifier",
+        description="MPLS Loopback Identifier"
+    )
+    mpls_loopback_ip_range: str = Field(
+        default="10.101.0.0/25",
+        alias="mplsLoopbackIpRange",
+        description="MPLS Loopback IP Range"
+    )
+
+    # iBGP-specific: Key Management Entity (KME) settings
+    key_management_entity_server_ip: Optional[str] = Field(
+        default=None,
+        alias="keyManagementEntityServerIp",
+        description="Key Management Entity Server IP"
+    )
+    key_management_entity_server_port: Optional[int] = Field(
+        default=None,
+        alias="keyManagementEntityServerPort",
+        description="Key Management Entity Server Port"
+    )
+
+    # iBGP-specific: Quantum Key Distribution (QKD) settings
+    quantum_key_distribution: bool = Field(
+        default=False,
+        alias="quantumKeyDistribution",
+        description="Enable Quantum Key Distribution"
+    )
+    quantum_key_distribution_profile_name: Optional[str] = Field(
+        default=None,
+        alias="quantumKeyDistributionProfileName",
+        description="Quantum Key Distribution Profile Name"
+    )
+
+    # iBGP-specific: PTP VLAN settings
+    ptp_vlan_id: Optional[int] = Field(
+        default=None,
+        alias="ptpVlanId",
+        description="PTP VLAN ID"
+    )
+
+    # iBGP-specific: Policy-based routing
+    policy_based_routing: bool = Field(
+        default=False,
+        alias="policyBasedRouting",
+        description="Enable Policy-Based Routing"
+    )
+
+    # Common settings (inherited but may have iBGP-specific defaults)
+    bfd_ibgp: bool = Field(
+        default=False,
+        alias="bfdIbgp",
+        description="Enable BFD for iBGP"
+    )
+    
+    # iBGP-specific: Additional properties from OpenAPI spec
+    # IPv6 multicast settings
+    ipv6_anycast_rendezvous_point_ip_range: str = Field(
+        default="fd00::254:254:0/118",
+        alias="ipv6AnycastRendezvousPointIpRange",
+        description="IPv6 Anycast RP IP Range for IPv6 Underlay Multicast"
+    )
+    ipv6_multicast_group_subnet: str = Field(
+        default="ff1e::/121",
+        alias="ipv6MulticastGroupSubnet",
+        description="IPv6 Multicast Group Subnet for IPv6 Underlay"
+    )
+    
+    # L3 VNI IPv6 settings
+    l3_vni_ipv6_multicast_group: str = Field(
+        default="ff1e::",
+        alias="l3VniIpv6MulticastGroup",
+        description="L3 VNI IPv6 Multicast Group"
+    )
+    
+    # NVE IPv6 settings
+    nve_loopback_ipv6_range: str = Field(
+        default="fd00::a03:0/118",
+        alias="nveLoopbackIpv6Range",
+        description="NVE Loopback IPv6 address range"
+    )
+    
+    # Per-VRF loopback settings
+    per_vrf_loopback_ip_range: str = Field(
+        default="10.5.0.0/22",
+        alias="perVrfLoopbackIpRange",
+        description="Per-VRF Loopback IP address range"
+    )
+    per_vrf_loopback_ipv6_range: str = Field(
+        default="fd00::a05:0/112",
+        alias="perVrfLoopbackIpv6Range",
+        description="Per-VRF Loopback IPv6 address range"
+    )
+    
+    # Phantom RP settings
+    phantom_rendezvous_point_loopback_id1: int = Field(
+        default=2,
+        alias="phantomRendezvousPointLoopbackId1",
+        description="Phantom Rendezvous Point Loopback ID 1"
+    )
+    phantom_rendezvous_point_loopback_id2: int = Field(
+        default=3,
+        alias="phantomRendezvousPointLoopbackId2",
+        description="Phantom Rendezvous Point Loopback ID 2"
+    )
+    phantom_rendezvous_point_loopback_id3: int = Field(
+        default=4,
+        alias="phantomRendezvousPointLoopbackId3",
+        description="Phantom Rendezvous Point Loopback ID 3"
+    )
+    phantom_rendezvous_point_loopback_id4: int = Field(
+        default=5,
+        alias="phantomRendezvousPointLoopbackId4",
+        description="Phantom Rendezvous Point Loopback ID 4"
+    )
+    
+    # Anycast loopback settings
+    anycast_loopback_id: int = Field(
+        default=10,
+        alias="anycastLoopbackId",
+        description="Anycast Loopback ID for VXLAN"
+    )
+    
+    # DLB settings
+    dlb_mixed_mode_default: str = Field(
+        default="ecmp",
+        alias="dlbMixedModeDefault",
+        description="DLB mixed mode default (ecmp or flowlet)"
+    )
+    dlb_mode: str = Field(
+        default="flowlet",
+        alias="dlbMode",
+        description="DLB mode (flowlet or ecmp)"
+    )
+    flowlet_aging: Optional[int] = Field(
+        default=None,
+        alias="flowletAging",
+        description="Flowlet aging time in microseconds"
+    )
+    flowlet_dscp: Optional[str] = Field(
+        default=None,
+        alias="flowletDscp",
+        description="Flowlet DSCP value"
+    )
+    
+    # PTP settings
+    ptp_domain_id: int = Field(
+        default=0,
+        alias="ptpDomainId",
+        description="PTP domain ID"
+    )
+    ptp_loopback_id: int = Field(
+        default=0,
+        alias="ptpLoopbackId",
+        description="PTP loopback interface ID"
+    )
+    
+    # BGP authentication settings
+    # bgp_authentication_key_type: Optional[BgpAuthenticationKeyType] = Field(
+    #     default=None,
+    #     alias="bgpAuthenticationKeyType",
+    #     description="BGP Authentication Key Type (3des, type6, type7)"
+    # )
+    
+    # BFD authentication settings
+    bfd_authentication_key: Optional[str] = Field(
+        default=None,
+        alias="bfdAuthenticationKey",
+        description="BFD Authentication Key"
+    )
+    bfd_authentication_key_id: int = Field(
+        default=100,
+        alias="bfdAuthenticationKeyId",
+        description="BFD Authentication Key ID"
+    )
+    
+    # PIM authentication settings
+    pim_hello_authentication_key: Optional[str] = Field(
+        default=None,
+        alias="pimHelloAuthenticationKey",
+        description="PIM Hello Authentication Key"
+    )
+    
+    # MACSec settings
+    macsec_algorithm: str = Field(
+        default="AES_128_CMAC",
+        alias="macsecAlgorithm",
+        description="MACSec Algorithm"
+    )
+    macsec_cipher_suite: str = Field(
+        default="GCM-AES-XPN-256",
+        alias="macsecCipherSuite",
+        description="MACSec Cipher Suite"
+    )
+    macsec_fallback_algorithm: str = Field(
+        default="AES_128_CMAC",
+        alias="macsecFallbackAlgorithm",
+        description="MACSec Fallback Algorithm"
+    )
+    macsec_fallback_key_string: Optional[str] = Field(
+        default=None,
+        alias="macsecFallbackKeyString",
+        description="MACSec Fallback Key String"
+    )
+    macsec_key_string: Optional[str] = Field(
+        default=None,
+        alias="macsecKeyString",
+        description="MACSec Key String"
+    )
+    macsec_report_timer: int = Field(
+        default=5,
+        alias="macsecReportTimer",
+        description="MACSec Report Timer (seconds)"
+    )
+    
+    # Management settings
+    management_ipv4_prefix: int = Field(
+        default=24,
+        alias="managementIpv4Prefix",
+        description="Management IPv4 Prefix Length"
+    )
+    management_ipv6_prefix: int = Field(
+        default=64,
+        alias="managementIpv6Prefix",
+        description="Management IPv6 Prefix Length"
+    )
+    
+    # MVPN settings
+    mvpn_vrf_route_import_id: bool = Field(
+        default=True,
+        alias="mvpnVrfRouteImportId",
+        description="Enable MVPN VRF Route Import ID"
+    )
+    mvpn_vrf_route_import_id_range: Optional[str] = Field(
+        default=None,
+        alias="mvpnVrfRouteImportIdRange",
+        description="MVPN VRF Route Import ID Range"
+    )
+    
+    # OAM settings
+    ngoam_south_bound_loop_detect_probe_interval: int = Field(
+        default=300,
+        alias="ngoamSouthBoundLoopDetectProbeInterval",
+        description="NG-OAM South Bound Loop Detect Probe Interval (seconds)"
+    )
+    ngoam_south_bound_loop_detect_recovery_interval: int = Field(
+        default=600,
+        alias="ngoamSouthBoundLoopDetectRecoveryInterval",
+        description="NG-OAM South Bound Loop Detect Recovery Interval (seconds)"
+    )
+    
+    # DHCP settings
+    dhcp_protocol_version: str = Field(
+        default="dhcpv4",
+        alias="dhcpProtocolVersion",
+        description="DHCP Protocol Version (dhcpv4 or dhcpv6)"
+    )
+    
+    # CNP settings
+    cnp: str = Field(
+        default="48",
+        alias="cnp",
+        description="CNP (Cisco Network Protocol) value"
+    )
+    
+    # RoCE settings
+    roce_v2: str = Field(
+        default="26",
+        alias="roceV2",
+        description="RoCE v2 DSCP value"
+    )
+    
+    # Per-packet DSCP settings
+    per_packet_dscp: Optional[str] = Field(
+        default=None,
+        alias="perPacketDscp",
+        description="Per-packet DSCP value"
+    )
+    
+    # Priority Flow Control settings
+    priority_flow_control_watch_interval: Optional[int] = Field(
+        default=None,
+        alias="priorityFlowControlWatchInterval",
+        description="Priority Flow Control Watch Interval (milliseconds)"
+    )
+    
+    # Bandwidth settings
+    bandwidth_remaining: int = Field(
+        default=50,
+        alias="bandwidthRemaining",
+        description="Bandwidth Remaining percentage"
+    )
+    
+    # WRED settings
+    wred_drop_probability: int = Field(
+        default=7,
+        alias="wredDropProbability",
+        description="WRED Drop Probability"
+    )
+    wred_max: int = Field(
+        default=3000,
+        alias="wredMax",
+        description="WRED Maximum Threshold"
+    )
+    wred_min: int = Field(
+        default=950,
+        alias="wredMin",
+        description="WRED Minimum Threshold"
+    )
+    wred_weight: int = Field(
+        default=0,
+        alias="wredWeight",
+        description="WRED Weight"
+    )
+    
+    # Shared VPC settings
+    shared_vpc_domain_id: int = Field(
+        default=1,
+        alias="sharedVpcDomainId",
+        description="Shared VPC Domain ID"
+    )
+    
+    # Interface statistics settings
+    interface_statistics_load_interval: int = Field(
+        default=10,
+        alias="interfaceStatisticsLoadInterval",
+        description="Interface Statistics Load Interval (seconds)"
+    )
+    
+    # Bootstrap subnet collection
+    # bootstrap_subnet_collection: Optional[List[str]] = Field(
+    #     default=None,
+    #     alias="bootstrapSubnetCollection",
+    #     description="Bootstrap Subnet Collection for DHCP/POAP"
+    # )
+    
+    # Private VLAN settings
+    default_private_vlan_secondary_network_template: Optional[str] = Field(
+        default=None,
+        alias="defaultPrivateVlanSecondaryNetworkTemplate",
+        description="Default Private VLAN Secondary Network Template"
+    )
+
+
+class VxlanEbgpManagementModel(FabricManagementModel):
+    """
+    Management model specific to vxlanEbgp fabrics.
+    
+    This model includes eBGP-specific properties for VXLAN fabrics using
+    External BGP (eBGP) without requiring IGP underlay or route reflectors.
+    
+    Key eBGP characteristics:
+    - Multiple ASNs (per leaf, border, spine, or tier)
+    - No route reflectors required (eBGP full mesh or partial mesh)
+    - Native eBGP underlay (no IGP required)
+    - ASN auto-allocation support
+    - First-hop redundancy protocol (HSRP/VRRP)
+    
+    Total properties: 191 (from OpenAPI vxlanEbgp schema)
+    """
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        use_enum_values=True,
+        validate_assignment=True,
+        populate_by_name=True,
+    )
+
+    # Override type to be eBGP specific
+    type: Literal["vxlanEbgp"] = Field(default="vxlanEbgp", alias="type")
+
+    # eBGP-specific: Multiple ASN Configuration
+    super_spine_bgp_as: Optional[str] = Field(
+        default=None,
+        alias="superSpineBgpAs",
+        description="BGP ASN for super-spine switches"
+    )
+    leaf_bgp_as: Optional[str] = Field(
+        default=None,
+        alias="leafBgpAs",
+        description="BGP ASN for leaf switches"
+    )
+    border_bgp_as: Optional[str] = Field(
+        default=None,
+        alias="borderBgpAs",
+        description="BGP ASN for border switches"
+    )
+
+    # eBGP-specific: ASN Allocation Mode
+    bgp_as_mode: Literal["multiAS", "sameTierAS"] = Field(
+        default="multiAS",
+        alias="bgpAsMode",
+        description="Multi-AS: Unique ASN per device. Same-Tier-AS: Leafs share ASN, Borders share ASN"
+    )
+    bgp_asn_auto_allocation: bool = Field(
+        default=True,
+        alias="bgpAsnAutoAllocation",
+        description="Automatically allocate and track BGP ASN for leafs, borders, and border gateways"
+    )
+    bgp_asn_range: str = Field(
+        default="5000-5900",
+        alias="bgpAsnRange",
+        description="BGP ASN range for auto-allocation (1-4294967295 or 1.0-65535.65535)"
+    )
+    allow_leaf_same_as: bool = Field(
+        default=False,
+        alias="allowLeafSameAs",
+        description="Allow leafs to have same BGP ASN even when AS mode is Multi-AS"
+    )
+
+    # eBGP-specific: eBGP EVPN Configuration
+    evpn: bool = Field(
+        default=True,
+        alias="evpn",
+        description="Enable BGP EVPN as control plane and VXLAN as data plane"
+    )
+    auto_configure_ebgp_evpn_peering: bool = Field(
+        default=True,
+        alias="autoConfigureEbgpEvpnPeering",
+        description="Automatically configure eBGP EVPN overlay peering between leaf and spine"
+    )
+
+    # eBGP-specific: IPv4/IPv6 Configuration
+    assign_ipv4_to_loopback0: bool = Field(
+        default=True,
+        alias="assignIpv4ToLoopback0",
+        description="In IPv6 fabric, assign IPv4 address for BGP Router ID to loopback interface"
+    )
+
+    # eBGP-specific: Route Map Configuration
+    disable_route_map_tag: bool = Field(
+        default=False,
+        alias="disableRouteMapTag",
+        description="No match tag for Route Map FABRIC-RMAP-REDIST-SUBNET"
+    )
+    route_map_tag: int = Field(
+        default=12345,
+        ge=0,
+        le=4294967295,
+        alias="routeMapTag",
+        description="Tag for Route Map FABRIC-RMAP-REDIST-SUBNET"
+    )
+
+    # eBGP-specific: BGP Path Configuration
+    bgp_max_path: int = Field(
+        default=4,
+        ge=1,
+        le=64,
+        alias="bgpMaxPath",
+        description="BGP Maximum Paths for load balancing"
+    )
+    bgp_allow_as_in_num: int = Field(
+        default=1,
+        ge=1,
+        le=10,
+        alias="bgpAllowAsInNum",
+        description="Number of occurrences of ASN allowed in BGP AS-path"
+    )
+    bgp_underlay_failure_protect: bool = Field(
+        default=False,
+        alias="bgpUnderlayFailureProtect",
+        description="Enable BGP underlay failure protection"
+    )
+
+    # eBGP-specific: First Hop Redundancy Protocol
+    first_hop_redundancy_protocol: Literal["hsrp", "vrrp"] = Field(
+        default="hsrp",
+        alias="firstHopRedundancyProtocol",
+        description="First Hop Redundancy Protocol (HSRP or VRRP)"
+    )
+    
+    # eBGP-specific: Additional properties from OpenAPI spec
+    # These properties are specific to eBGP and not present in iBGP or base model
+    
+    # BGP IPv6 settings
+    bgp_loopback_ipv6_range: str = Field(
+        default="fd00::a02:0/119",
+        alias="bgpLoopbackIpv6Range",
+        description="BGP Loopback IPv6 address range"
+    )
+    
+    # IPv6 multicast settings
+    ipv6_anycast_rendezvous_point_ip_range: str = Field(
+        default="fd00::254:254:0/118",
+        alias="ipv6AnycastRendezvousPointIpRange",
+        description="IPv6 Anycast RP IP Range for IPv6 Underlay Multicast"
+    )
+    ipv6_multicast_group_subnet: str = Field(
+        default="ff1e::/121",
+        alias="ipv6MulticastGroupSubnet",
+        description="IPv6 Multicast Group Subnet for IPv6 Underlay"
+    )
+    
+    # L3 VNI settings
+    l3_vni_ipv6_multicast_group: str = Field(
+        default="ff1e::",
+        alias="l3VniIpv6MulticastGroup",
+        description="L3 VNI IPv6 Multicast Group"
+    )
+    
+    # NVE IPv6 settings
+    nve_loopback_ipv6_range: str = Field(
+        default="fd00::a03:0/118",
+        alias="nveLoopbackIpv6Range",
+        description="NVE Loopback IPv6 address range"
+    )
+    
+    # Per-VRF loopback settings
+    per_vrf_loopback_ip_range: str = Field(
+        default="10.5.0.0/22",
+        alias="perVrfLoopbackIpRange",
+        description="Per-VRF Loopback IP address range"
+    )
+    per_vrf_loopback_ipv6_range: str = Field(
+        default="fd00::a05:0/112",
+        alias="perVrfLoopbackIpv6Range",
+        description="Per-VRF Loopback IPv6 address range"
+    )
+    
+    # Phantom RP settings
+    phantom_rendezvous_point_loopback_id1: int = Field(
+        default=2,
+        alias="phantomRendezvousPointLoopbackId1",
+        description="Phantom Rendezvous Point Loopback ID 1"
+    )
+    phantom_rendezvous_point_loopback_id2: int = Field(
+        default=3,
+        alias="phantomRendezvousPointLoopbackId2",
+        description="Phantom Rendezvous Point Loopback ID 2"
+    )
+    phantom_rendezvous_point_loopback_id3: int = Field(
+        default=4,
+        alias="phantomRendezvousPointLoopbackId3",
+        description="Phantom Rendezvous Point Loopback ID 3"
+    )
+    phantom_rendezvous_point_loopback_id4: int = Field(
+        default=5,
+        alias="phantomRendezvousPointLoopbackId4",
+        description="Phantom Rendezvous Point Loopback ID 4"
+    )
+    
+    # Anycast loopback settings
+    anycast_loopback_id: int = Field(
+        default=10,
+        alias="anycastLoopbackId",
+        description="Anycast Loopback ID for VXLAN"
+    )
+    
+    # DLB (Dynamic Load Balancing) settings
+    dlb_mixed_mode_default: str = Field(
+        default="ecmp",
+        alias="dlbMixedModeDefault",
+        description="DLB mixed mode default (ecmp or flowlet)"
+    )
+    dlb_mode: str = Field(
+        default="flowlet",
+        alias="dlbMode",
+        description="DLB mode (flowlet or ecmp)"
+    )
+    flowlet_aging: Optional[int] = Field(
+        default=None,
+        alias="flowletAging",
+        description="Flowlet aging time in microseconds"
+    )
+    flowlet_dscp: Optional[str] = Field(
+        default=None,
+        alias="flowletDscp",
+        description="Flowlet DSCP value"
+    )
+    
+    # PTP (Precision Time Protocol) settings
+    ptp_domain_id: int = Field(
+        default=0,
+        alias="ptpDomainId",
+        description="PTP domain ID"
+    )
+    ptp_loopback_id: int = Field(
+        default=0,
+        alias="ptpLoopbackId",
+        description="PTP loopback interface ID"
+    )
+    
+    # BGP authentication settings
+    # bgp_authentication_key_type: Optional[BgpAuthenticationKeyType] = Field(
+    #     default=None,
+    #     alias="bgpAuthenticationKeyType",
+    #     description="BGP Authentication Key Type (3des, type6, type7)"
+    # )
+    
+    # BFD authentication settings
+    bfd_authentication_key: Optional[str] = Field(
+        default=None,
+        alias="bfdAuthenticationKey",
+        description="BFD Authentication Key"
+    )
+    bfd_authentication_key_id: int = Field(
+        default=100,
+        alias="bfdAuthenticationKeyId",
+        description="BFD Authentication Key ID"
+    )
+    
+    # PIM authentication settings
+    pim_hello_authentication_key: Optional[str] = Field(
+        default=None,
+        alias="pimHelloAuthenticationKey",
+        description="PIM Hello Authentication Key"
+    )
+    
+    # MACSec settings
+    macsec_algorithm: str = Field(
+        default="AES_128_CMAC",
+        alias="macsecAlgorithm",
+        description="MACSec Algorithm"
+    )
+    macsec_cipher_suite: str = Field(
+        default="GCM-AES-XPN-256",
+        alias="macsecCipherSuite",
+        description="MACSec Cipher Suite"
+    )
+    macsec_fallback_algorithm: str = Field(
+        default="AES_128_CMAC",
+        alias="macsecFallbackAlgorithm",
+        description="MACSec Fallback Algorithm"
+    )
+    macsec_fallback_key_string: Optional[str] = Field(
+        default=None,
+        alias="macsecFallbackKeyString",
+        description="MACSec Fallback Key String"
+    )
+    macsec_key_string: Optional[str] = Field(
+        default=None,
+        alias="macsecKeyString",
+        description="MACSec Key String"
+    )
+    macsec_report_timer: int = Field(
+        default=5,
+        alias="macsecReportTimer",
+        description="MACSec Report Timer (seconds)"
+    )
+    
+    # Management settings
+    management_ipv4_prefix: int = Field(
+        default=24,
+        alias="managementIpv4Prefix",
+        description="Management IPv4 Prefix Length"
+    )
+    management_ipv6_prefix: int = Field(
+        default=64,
+        alias="managementIpv6Prefix",
+        description="Management IPv6 Prefix Length"
+    )
+    
+    # MVPN settings
+    mvpn_vrf_route_import_id: bool = Field(
+        default=True,
+        alias="mvpnVrfRouteImportId",
+        description="Enable MVPN VRF Route Import ID"
+    )
+    mvpn_vrf_route_import_id_range: Optional[str] = Field(
+        default=None,
+        alias="mvpnVrfRouteImportIdRange",
+        description="MVPN VRF Route Import ID Range"
+    )
+    
+    # OAM (Operations, Administration, and Maintenance) settings
+    ngoam_south_bound_loop_detect_probe_interval: int = Field(
+        default=300,
+        alias="ngoamSouthBoundLoopDetectProbeInterval",
+        description="NG-OAM South Bound Loop Detect Probe Interval (seconds)"
+    )
+    ngoam_south_bound_loop_detect_recovery_interval: int = Field(
+        default=600,
+        alias="ngoamSouthBoundLoopDetectRecoveryInterval",
+        description="NG-OAM South Bound Loop Detect Recovery Interval (seconds)"
+    )
+    
+    # DHCP settings
+    dhcp_protocol_version: str = Field(
+        default="dhcpv4",
+        alias="dhcpProtocolVersion",
+        description="DHCP Protocol Version (dhcpv4 or dhcpv6)"
+    )
+    
+    # CNP (Cisco Network Protocol) settings
+    cnp: str = Field(
+        default="48",
+        alias="cnp",
+        description="CNP (Cisco Network Protocol) value"
+    )
+    
+    # RoCE (RDMA over Converged Ethernet) settings
+    roce_v2: str = Field(
+        default="26",
+        alias="roceV2",
+        description="RoCE v2 DSCP value"
+    )
+    
+    # Per-packet DSCP settings
+    per_packet_dscp: Optional[str] = Field(
+        default=None,
+        alias="perPacketDscp",
+        description="Per-packet DSCP value"
+    )
+    
+    # Priority Flow Control settings
+    priority_flow_control_watch_interval: Optional[int] = Field(
+        default=None,
+        alias="priorityFlowControlWatchInterval",
+        description="Priority Flow Control Watch Interval (milliseconds)"
+    )
+    
+    # Bandwidth settings
+    bandwidth_remaining: int = Field(
+        default=50,
+        alias="bandwidthRemaining",
+        description="Bandwidth Remaining percentage"
+    )
+    
+    # WRED (Weighted Random Early Detection) settings
+    wred_drop_probability: int = Field(
+        default=7,
+        alias="wredDropProbability",
+        description="WRED Drop Probability"
+    )
+    wred_max: int = Field(
+        default=3000,
+        alias="wredMax",
+        description="WRED Maximum Threshold"
+    )
+    wred_min: int = Field(
+        default=950,
+        alias="wredMin",
+        description="WRED Minimum Threshold"
+    )
+    wred_weight: int = Field(
+        default=0,
+        alias="wredWeight",
+        description="WRED Weight"
+    )
+    
+    # Shared VPC settings
+    shared_vpc_domain_id: int = Field(
+        default=1,
+        alias="sharedVpcDomainId",
+        description="Shared VPC Domain ID"
+    )
+    
+    # Interface statistics settings
+    interface_statistics_load_interval: int = Field(
+        default=10,
+        alias="interfaceStatisticsLoadInterval",
+        description="Interface Statistics Load Interval (seconds)"
+    )
+    
+    # Bootstrap subnet collection (for DHCP/POAP)
+    # bootstrap_subnet_collection: Optional[List[str]] = Field(
+    #     default=None,
+    #     alias="bootstrapSubnetCollection",
+    #     description="Bootstrap Subnet Collection for DHCP/POAP"
+    # )
+    
+    # Private VLAN settings
+    default_private_vlan_secondary_network_template: Optional[str] = Field(
+        default=None,
+        alias="defaultPrivateVlanSecondaryNetworkTemplate",
+        description="Default Private VLAN Secondary Network Template"
+    )
+
+
+# Create union type for management models with discriminator
+# Using discriminated union for fast, explicit model selection based on 'type' field
+# Base FabricManagementModel excluded - only concrete fabric types in union
+ManagementModelUnion = Union[VxlanIbgpManagementModel, VxlanEbgpManagementModel]
+
+
+class FabricModel(BaseModel):
     """
     Represents a Fabric model in the network infrastructure.
     This class models a fabric configuration including its name, security domain,
@@ -1472,7 +2669,7 @@ class FabricModelvxlanIbgp(BaseModel):
     license_tier: str = Field(default="premier", alias="licenseTier", description="License Tier value of a fabric (premier, advantage, essentials)")
     location: LocationModel = Field(default_factory=LocationModel, alias="location")
     external_streaming_settings: ExternalStreamingSettingsModel = Field(default_factory=ExternalStreamingSettingsModel, alias="externalStreamingSettings")
-    management: Optional[FabricManagementModel] = Field(default=None, alias="management")
+    management: Optional[ManagementModelUnion] = Field(default=None, alias="management", discriminator="type")
 
     @field_validator("name", mode="before")
     @classmethod
