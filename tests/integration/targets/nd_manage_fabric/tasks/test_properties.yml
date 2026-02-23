@@ -1,0 +1,326 @@
+---
+# Property validation tests for nd_manage_fabric module
+# Tests fabric property constraints and validation
+
+- name: Test Properties 1 - Validate required properties
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-prop-required"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65700"
+          anycast_gateway_mac: "2020.0000.0700"
+          replication_mode: ingress
+  register: properties_test1_result
+
+- name: Verify Properties Test 1 - Required properties
+  assert:
+    that:
+      - properties_test1_result is changed
+      - properties_test1_result.response is defined
+    fail_msg: "Required properties validation failed"
+    success_msg: "Required properties validated successfully"
+
+- name: Test Properties 2 - Validate BGP ASN range
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-prop-bgp-asn"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "4294967295"  # Maximum valid ASN
+          anycast_gateway_mac: "2020.0000.0701"
+          replication_mode: multicast
+  register: properties_test2_result
+
+- name: Verify Properties Test 2 - BGP ASN validation
+  assert:
+    that:
+      - properties_test2_result is changed
+      - properties_test2_result.response is defined
+    fail_msg: "BGP ASN validation failed"
+    success_msg: "BGP ASN validated successfully"
+
+- name: Test Properties 3 - Validate MAC address format
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-prop-mac"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65702"
+          anycast_gateway_mac: "2020.0000.0702"
+          replication_mode: ingress
+  register: properties_test3_result
+
+- name: Verify Properties Test 3 - MAC address validation
+  assert:
+    that:
+      - properties_test3_result is changed
+      - properties_test3_result.response is defined
+    fail_msg: "MAC address validation failed"
+    success_msg: "MAC address validated successfully"
+
+- name: Test Properties 4 - Validate MTU ranges
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-prop-mtu"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65703"
+          anycast_gateway_mac: "2020.0000.0703"
+          replication_mode: multicast
+          fabric_mtu: 9216
+          l2_host_interface_mtu: 9000
+  register: properties_test4_result
+
+- name: Verify Properties Test 4 - MTU validation
+  assert:
+    that:
+      - properties_test4_result is changed
+      - properties_test4_result.response is defined
+    fail_msg: "MTU validation failed"
+    success_msg: "MTU validated successfully"
+
+- name: Test Properties 5 - Validate VNI ranges
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-prop-vni"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65704"
+          anycast_gateway_mac: "2020.0000.0704"
+          replication_mode: ingress
+          l3_vni_range: "80000-89999"
+          l2_vni_range: "60000-79999"
+  register: properties_test5_result
+
+- name: Verify Properties Test 5 - VNI range validation
+  assert:
+    that:
+      - properties_test5_result is changed
+      - properties_test5_result.response is defined
+    fail_msg: "VNI range validation failed"
+    success_msg: "VNI range validated successfully"
+
+- name: Test Properties 6 - Validate VLAN ranges
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-prop-vlan"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65705"
+          anycast_gateway_mac: "2020.0000.0705"
+          replication_mode: multicast
+          vrf_vlan_range: "2000-2999"
+          network_vlan_range: "3000-3999"
+  register: properties_test6_result
+
+- name: Verify Properties Test 6 - VLAN range validation
+  assert:
+    that:
+      - properties_test6_result is changed
+      - properties_test6_result.response is defined
+    fail_msg: "VLAN range validation failed"
+    success_msg: "VLAN range validated successfully"
+
+- name: Test Properties 7 - Validate OSPF area ID format
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-prop-ospf"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65706"
+          anycast_gateway_mac: "2020.0000.0706"
+          replication_mode: ingress
+          link_state_routing_protocol: ospf
+          ospf_area_id: "0.0.0.0"
+  register: properties_test7_result
+
+- name: Verify Properties Test 7 - OSPF area ID validation
+  assert:
+    that:
+      - properties_test7_result is changed
+      - properties_test7_result.response is defined
+    fail_msg: "OSPF area ID validation failed"
+    success_msg: "OSPF area ID validated successfully"
+
+- name: Test Properties 8 - Validate location coordinates
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-prop-location"
+        category: fabric
+        security_domain: all
+        location:
+          latitude: 90.0    # Maximum valid latitude
+          longitude: 180.0  # Maximum valid longitude
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65707"
+          anycast_gateway_mac: "2020.0000.0707"
+          replication_mode: multicast
+  register: properties_test8_result
+
+- name: Verify Properties Test 8 - Location validation
+  assert:
+    that:
+      - properties_test8_result is changed
+      - properties_test8_result.response is defined
+    fail_msg: "Location validation failed"
+    success_msg: "Location validated successfully"
+
+- name: Test Properties 9 - Validate VPC settings
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-prop-vpc"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65708"
+          anycast_gateway_mac: "2020.0000.0708"
+          replication_mode: ingress
+          vpc_peer_link_port_channel_id: "999"
+          vpc_peer_link_vlan: "4094"
+          vpc_delay_restore_timer: 600
+  register: properties_test9_result
+
+- name: Verify Properties Test 9 - VPC settings validation
+  assert:
+    that:
+      - properties_test9_result is changed
+      - properties_test9_result.response is defined
+    fail_msg: "VPC settings validation failed"
+    success_msg: "VPC settings validated successfully"
+
+- name: Test Properties 10 - Validate AI/ML specific properties
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-prop-aiml"
+        category: fabric
+        security_domain: all
+        management:
+          type: aimlVxlanEbgp
+          bgp_asn: "65709"
+          anycast_gateway_mac: "2020.0000.0709"
+          replication_mode: multicast
+          aiml_qos: true
+          aiml_qos_policy: 400G
+  register: properties_test10_result
+
+- name: Verify Properties Test 10 - AI/ML properties validation
+  assert:
+    that:
+      - properties_test10_result is changed
+      - properties_test10_result.response is defined
+    fail_msg: "AI/ML properties validation failed"
+    success_msg: "AI/ML properties validated successfully"
+
+- name: Test Properties 11 - Validate boolean properties
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-prop-booleans"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65710"
+          anycast_gateway_mac: "2020.0000.0710"
+          replication_mode: ingress
+          bfd: true
+          bfd_ibgp: true
+          bfd_pim: false
+          bfd_isis: true
+          bfd_ospf: false
+          security_group_tag: true
+          macsec: false
+          performance_monitoring: true
+          real_time_interface_statistics_collection: false
+          strict_config_compliance_mode: true
+  register: properties_test11_result
+
+- name: Verify Properties Test 11 - Boolean properties validation
+  assert:
+    that:
+      - properties_test11_result is changed
+      - properties_test11_result.response is defined
+    fail_msg: "Boolean properties validation failed"
+    success_msg: "Boolean properties validated successfully"
+
+- name: Test Properties 12 - Validate combination constraints
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-prop-constraints"
+        category: fabric
+        security_domain: all
+        management:
+          type: aimlVxlanEbgp
+          bgp_asn: "65711"
+          anycast_gateway_mac: "2020.0000.0711"
+          replication_mode: multicast
+          # AI/ML with required properties
+          aiml_qos: true
+          aiml_qos_policy: 100G
+          fabric_interface_type: p2p
+          link_state_routing_protocol: ospf
+          ospf_area_id: "0.0.0.1"
+  register: properties_test12_result
+
+- name: Verify Properties Test 12 - Combination constraints validation
+  assert:
+    that:
+      - properties_test12_result is changed
+      - properties_test12_result.response is defined
+    fail_msg: "Combination constraints validation failed"
+    success_msg: "Combination constraints validated successfully"
+
+- name: Clean up property test fabrics
+  cisco.nd.nd_manage_fabric:
+    state: deleted
+    config:
+      - name: "{{ test_fabric_prefix }}-prop-required"
+      - name: "{{ test_fabric_prefix }}-prop-bgp-asn"
+      - name: "{{ test_fabric_prefix }}-prop-mac"
+      - name: "{{ test_fabric_prefix }}-prop-mtu"
+      - name: "{{ test_fabric_prefix }}-prop-vni"
+      - name: "{{ test_fabric_prefix }}-prop-vlan"
+      - name: "{{ test_fabric_prefix }}-prop-ospf"
+      - name: "{{ test_fabric_prefix }}-prop-location"
+      - name: "{{ test_fabric_prefix }}-prop-vpc"
+      - name: "{{ test_fabric_prefix }}-prop-aiml"
+      - name: "{{ test_fabric_prefix }}-prop-booleans"
+      - name: "{{ test_fabric_prefix }}-prop-constraints"
+  register: properties_cleanup_result
+  ignore_errors: true
+
+- name: Display property validation test results
+  debug:
+    msg:
+      - "Property validation tests completed"
+      - "All property constraints and validations tested successfully"
+      - "Required properties, ranges, formats, and combinations verified"
+      - "Cleanup completed: {{ properties_cleanup_result.changed | default(false) }}"

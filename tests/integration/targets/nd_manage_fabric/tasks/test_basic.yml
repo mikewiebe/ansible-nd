@@ -1,0 +1,78 @@
+---
+# Basic functionality tests for nd_manage_fabric module
+# Tests basic CRUD operations and module response format
+
+- name: Test 1 - Create basic fabric with minimal configuration
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - "{{ basic_fabric_config }}"
+  register: test1_result
+
+- name: Verify Test 1 - Basic fabric creation
+  assert:
+    that:
+      - test1_result is changed
+      - test1_result.response is defined
+      - test1_result.diff is defined
+    fail_msg: "Basic fabric creation failed"
+    success_msg: "Basic fabric created successfully"
+
+- name: Test 2 - Query the created basic fabric
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics
+  register: test2_result
+
+- name: Verify Test 2 - Fabric exists and count is 1
+  assert:
+    that:
+      - test2_result.jsondata is defined
+      - test2_result.jsondata.fabrics is defined
+      - test2_result.jsondata.fabrics | length == 1
+      - test2_result.jsondata.fabrics[0].name == basic_fabric_config.name
+    fail_msg: "Fabric not found or count is not 1"
+    success_msg: "Fabric created and found as expected"
+
+- name: Test 3 - Create fabric with comprehensive configuration
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - "{{ advanced_fabric_config }}"
+  register: test3_result
+
+- name: Verify Test 3 - Advanced fabric creation
+  assert:
+    that:
+      - test3_result is changed
+      - test3_result.response is defined
+    fail_msg: "Advanced fabric creation failed"
+    success_msg: "Advanced fabric created successfully"
+
+- name: Test 4 - Query all fabrics
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics
+  register: test4_result
+
+- name: Verify Test 4 - Query all fabrics
+  assert:
+    that:
+      - test4_result.jsondata is defined
+      - test4_result.jsondata.fabrics is defined
+      - test4_result.jsondata.fabrics | length == 2
+      - test4_result.jsondata.fabrics | map(attribute='name') | list is superset([basic_fabric_config.name, advanced_fabric_config.name])
+      - test4_result.jsondata.fabrics[0].category is defined
+      - test4_result.jsondata.fabrics[0].securityDomain is defined
+      - test4_result.jsondata.fabrics[0].management is defined
+      - test4_result.jsondata.fabrics[0].management.type is defined
+      - test4_result.jsondata.fabrics[0].management.bgpAsn is defined
+    fail_msg: "Query all fabrics failed"
+    success_msg: "Query all fabrics successful"
+
+- name: Display basic test results summary
+  debug:
+    msg:
+      - "Basic functionality tests completed"
+      - "Created fabrics: {{ [basic_fabric_config.name, advanced_fabric_config.name] }}"
+      - "All basic tests passed successfully"

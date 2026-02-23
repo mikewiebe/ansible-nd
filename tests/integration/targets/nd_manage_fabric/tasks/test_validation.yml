@@ -1,0 +1,346 @@
+---
+# Error validation tests for nd_manage_fabric module
+# Tests error handling and input validation
+
+- name: Test Validation 1 - Missing required name parameter
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65800"
+          anycast_gateway_mac: "2020.0000.0800"
+          replication_mode: ingress
+  register: validation_test1_result
+  ignore_errors: true
+
+- name: Verify Validation Test 1 - Missing name error
+  assert:
+    that:
+      - validation_test1_result is failed
+    fail_msg: "Missing name parameter should cause validation error"
+    success_msg: "Missing name parameter properly validated"
+
+- name: Test Validation 2 - Invalid BGP ASN (out of range)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-invalid-asn"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "4294967296"  # Exceeds maximum 32-bit ASN
+          anycast_gateway_mac: "2020.0000.0801"
+          replication_mode: ingress
+  register: validation_test2_result
+  ignore_errors: true
+
+- name: Verify Validation Test 2 - Invalid BGP ASN error
+  assert:
+    that:
+      - validation_test2_result is failed
+    fail_msg: "Invalid BGP ASN should cause validation error"
+    success_msg: "Invalid BGP ASN properly validated"
+
+- name: Test Validation 3 - Invalid MAC address format
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-invalid-mac"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65802"
+          anycast_gateway_mac: "invalid.mac.format"
+          replication_mode: multicast
+  register: validation_test3_result
+  ignore_errors: true
+
+- name: Verify Validation Test 3 - Invalid MAC address error
+  assert:
+    that:
+      - validation_test3_result is failed
+    fail_msg: "Invalid MAC address should cause validation error"
+    success_msg: "Invalid MAC address properly validated"
+
+- name: Test Validation 4 - Invalid fabric type
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-invalid-type"
+        category: fabric
+        security_domain: all
+        management:
+          type: invalidFabricType
+          bgp_asn: "65803"
+          anycast_gateway_mac: "2020.0000.0803"
+          replication_mode: ingress
+  register: validation_test4_result
+  ignore_errors: true
+
+- name: Verify Validation Test 4 - Invalid fabric type error
+  assert:
+    that:
+      - validation_test4_result is failed
+    fail_msg: "Invalid fabric type should cause validation error"
+    success_msg: "Invalid fabric type properly validated"
+
+- name: Test Validation 5 - Invalid replication mode
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-invalid-replication"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65804"
+          anycast_gateway_mac: "2020.0000.0804"
+          replication_mode: invalidMode
+  register: validation_test5_result
+  ignore_errors: true
+
+- name: Verify Validation Test 5 - Invalid replication mode error
+  assert:
+    that:
+      - validation_test5_result is failed
+    fail_msg: "Invalid replication mode should cause validation error"
+    success_msg: "Invalid replication mode properly validated"
+
+- name: Test Validation 6 - Invalid fabric interface type
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-invalid-interface"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65805"
+          anycast_gateway_mac: "2020.0000.0805"
+          replication_mode: ingress
+          fabric_interface_type: invalidInterface
+  register: validation_test6_result
+  ignore_errors: true
+
+- name: Verify Validation Test 6 - Invalid fabric interface type error
+  assert:
+    that:
+      - validation_test6_result is failed
+    fail_msg: "Invalid fabric interface type should cause validation error"
+    success_msg: "Invalid fabric interface type properly validated"
+
+- name: Test Validation 7 - Invalid MTU value (too small)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-invalid-mtu-small"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65806"
+          anycast_gateway_mac: "2020.0000.0806"
+          replication_mode: multicast
+          fabric_mtu: 500  # Too small
+  register: validation_test7_result
+  ignore_errors: true
+
+- name: Verify Validation Test 7 - Invalid MTU (small) error
+  assert:
+    that:
+      - validation_test7_result is failed
+    fail_msg: "Invalid MTU (too small) should cause validation error"
+    success_msg: "Invalid MTU (too small) properly validated"
+
+- name: Test Validation 8 - Invalid MTU value (too large)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-invalid-mtu-large"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65807"
+          anycast_gateway_mac: "2020.0000.0807"
+          replication_mode: ingress
+          fabric_mtu: 20000  # Too large
+  register: validation_test8_result
+  ignore_errors: true
+
+- name: Verify Validation Test 8 - Invalid MTU (large) error
+  assert:
+    that:
+      - validation_test8_result is failed
+    fail_msg: "Invalid MTU (too large) should cause validation error"
+    success_msg: "Invalid MTU (too large) properly validated"
+
+- name: Test Validation 9 - Invalid OSPF area ID format
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-invalid-ospf"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65808"
+          anycast_gateway_mac: "2020.0000.0808"
+          replication_mode: multicast
+          link_state_routing_protocol: ospf
+          ospf_area_id: "invalid.area.id"
+  register: validation_test9_result
+  ignore_errors: true
+
+- name: Verify Validation Test 9 - Invalid OSPF area ID error
+  assert:
+    that:
+      - validation_test9_result is failed
+    fail_msg: "Invalid OSPF area ID should cause validation error"
+    success_msg: "Invalid OSPF area ID properly validated"
+
+- name: Test Validation 10 - Invalid latitude value
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-invalid-latitude"
+        category: fabric
+        security_domain: all
+        location:
+          latitude: 91.0    # Exceeds valid range (-90 to 90)
+          longitude: 0.0
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65809"
+          anycast_gateway_mac: "2020.0000.0809"
+          replication_mode: ingress
+  register: validation_test10_result
+  ignore_errors: true
+
+- name: Verify Validation Test 10 - Invalid latitude error
+  assert:
+    that:
+      - validation_test10_result is failed
+    fail_msg: "Invalid latitude should cause validation error"
+    success_msg: "Invalid latitude properly validated"
+
+- name: Test Validation 11 - Invalid longitude value
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-invalid-longitude"
+        category: fabric
+        security_domain: all
+        location:
+          latitude: 0.0
+          longitude: 181.0  # Exceeds valid range (-180 to 180)
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65810"
+          anycast_gateway_mac: "2020.0000.0810"
+          replication_mode: multicast
+  register: validation_test11_result
+  ignore_errors: true
+
+- name: Verify Validation Test 11 - Invalid longitude error
+  assert:
+    that:
+      - validation_test11_result is failed
+    fail_msg: "Invalid longitude should cause validation error"
+    success_msg: "Invalid longitude properly validated"
+
+- name: Test Validation 12 - Invalid VPC VLAN (out of range)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-invalid-vpc-vlan"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65811"
+          anycast_gateway_mac: "2020.0000.0811"
+          replication_mode: ingress
+          vpc_peer_link_vlan: "4095"  # Exceeds valid VLAN range
+  register: validation_test12_result
+  ignore_errors: true
+
+- name: Verify Validation Test 12 - Invalid VPC VLAN error
+  assert:
+    that:
+      - validation_test12_result is failed
+    fail_msg: "Invalid VPC VLAN should cause validation error"
+    success_msg: "Invalid VPC VLAN properly validated"
+
+- name: Test Validation 13 - Conflicting AI/ML settings
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-aiml-conflict"
+        category: fabric
+        security_domain: all
+        management:
+          type: classicLan  # Not AI/ML fabric type
+          bgp_asn: "65812"
+          anycast_gateway_mac: "2020.0000.0812"
+          replication_mode: multicast
+          aiml_qos: true    # AI/ML setting on non-AI/ML fabric
+          aiml_qos_policy: 25G
+  register: validation_test13_result
+  ignore_errors: true
+
+- name: Verify Validation Test 13 - AI/ML conflict error
+  assert:
+    that:
+      - validation_test13_result is failed
+    fail_msg: "AI/ML settings on non-AI/ML fabric should cause validation error"
+    success_msg: "AI/ML settings conflict properly validated"
+
+- name: Test Validation 14 - Empty configuration list
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config: []
+  register: validation_test14_result
+  ignore_errors: true
+
+- name: Verify Validation Test 14 - Empty config handling
+  assert:
+    that:
+      - validation_test14_result is not changed
+    fail_msg: "Empty configuration should be handled gracefully"
+    success_msg: "Empty configuration handled properly"
+
+- name: Test Validation 15 - Invalid state parameter
+  cisco.nd.nd_manage_fabric:
+    state: invalid_state
+    config:
+      - name: "{{ test_fabric_prefix }}-invalid-state"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65813"
+          anycast_gateway_mac: "2020.0000.0813"
+          replication_mode: ingress
+  register: validation_test15_result
+  ignore_errors: true
+
+- name: Verify Validation Test 15 - Invalid state error
+  assert:
+    that:
+      - validation_test15_result is failed
+    fail_msg: "Invalid state should cause validation error"
+    success_msg: "Invalid state properly validated"
+
+- name: Display validation test results summary
+  debug:
+    msg:
+      - "Error validation tests completed"
+      - "All input validation and error handling scenarios tested"
+      - "Parameter validation, range checking, and constraint enforcement verified"
+      - "Module properly handles invalid inputs and edge cases"

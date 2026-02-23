@@ -1,0 +1,573 @@
+---
+# Enum value tests for nd_manage_fabric module
+# Tests all enum field values from the Pydantic models
+
+- name: Test Enums 1 - BgpAuthenticationKeyType enum values
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-bgp-auth-3des"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65900"
+          anycast_gateway_mac: "2020.0000.0900"
+          replication_mode: ingress
+          bgp_authentication_key_type: 3des
+  register: enum_test1_result
+
+- name: Verify Enums Test 1 - 3des authentication
+  assert:
+    that:
+      - enum_test1_result is changed
+      - enum_test1_result.response is defined
+    fail_msg: "3des BGP authentication enum failed"
+    success_msg: "3des BGP authentication enum validated"
+
+- name: Test Enums 2 - FabricInterfaceType enum values (numbered)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-interface-numbered"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65901"
+          anycast_gateway_mac: "2020.0000.0901"
+          replication_mode: multicast
+          fabric_interface_type: numbered
+  register: enum_test2_result
+
+- name: Verify Enums Test 2 - numbered interface type
+  assert:
+    that:
+      - enum_test2_result is changed
+      - enum_test2_result.response is defined
+    fail_msg: "numbered interface type enum failed"
+    success_msg: "numbered interface type enum validated"
+
+- name: Test Enums 3 - FabricInterfaceType enum values (unNumbered)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-interface-unnumbered"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65902"
+          anycast_gateway_mac: "2020.0000.0902"
+          replication_mode: ingress
+          fabric_interface_type: unNumbered
+  register: enum_test3_result
+
+- name: Verify Enums Test 3 - unNumbered interface type
+  assert:
+    that:
+      - enum_test3_result is changed
+      - enum_test3_result.response is defined
+    fail_msg: "unNumbered interface type enum failed"
+    success_msg: "unNumbered interface type enum validated"
+
+- name: Test Enums 4 - FabricInterfaceType enum values (p2p)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-interface-p2p"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65903"
+          anycast_gateway_mac: "2020.0000.0903"
+          replication_mode: multicast
+          fabric_interface_type: p2p
+  register: enum_test4_result
+
+- name: Verify Enums Test 4 - p2p interface type
+  assert:
+    that:
+      - enum_test4_result is changed
+      - enum_test4_result.response is defined
+    fail_msg: "p2p interface type enum failed"
+    success_msg: "p2p interface type enum validated"
+
+- name: Test Enums 5 - FabricType enum values (vxlanIbgp)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-type-vxlan-ibgp"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanIbgp
+          bgp_asn: "65904"
+          anycast_gateway_mac: "2020.0000.0904"
+          replication_mode: ingress
+  register: enum_test5_result
+
+- name: Verify Enums Test 5 - vxlanIbgp fabric type
+  assert:
+    that:
+      - enum_test5_result is changed
+      - enum_test5_result.response is defined
+    fail_msg: "vxlanIbgp fabric type enum failed"
+    success_msg: "vxlanIbgp fabric type enum validated"
+
+- name: Test Enums 6 - FabricType enum values (vxlanEbgp)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-type-vxlan-ebgp"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65905"
+          anycast_gateway_mac: "2020.0000.0905"
+          replication_mode: multicast
+  register: enum_test6_result
+
+- name: Verify Enums Test 6 - vxlanEbgp fabric type
+  assert:
+    that:
+      - enum_test6_result is changed
+      - enum_test6_result.response is defined
+    fail_msg: "vxlanEbgp fabric type enum failed"
+    success_msg: "vxlanEbgp fabric type enum validated"
+
+- name: Test Enums 7 - FabricType enum values (aimlVxlanIbgp)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-type-aiml-ibgp"
+        category: fabric
+        security_domain: all
+        management:
+          type: aimlVxlanIbgp
+          bgp_asn: "65906"
+          anycast_gateway_mac: "2020.0000.0906"
+          replication_mode: ingress
+          aiml_qos: true
+          aiml_qos_policy: 25G
+  register: enum_test7_result
+
+- name: Verify Enums Test 7 - aimlVxlanIbgp fabric type
+  assert:
+    that:
+      - enum_test7_result is changed
+      - enum_test7_result.response is defined
+    fail_msg: "aimlVxlanIbgp fabric type enum failed"
+    success_msg: "aimlVxlanIbgp fabric type enum validated"
+
+- name: Test Enums 8 - FabricType enum values (aimlVxlanEbgp)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-type-aiml-ebgp"
+        category: fabric
+        security_domain: all
+        management:
+          type: aimlVxlanEbgp
+          bgp_asn: "65907"
+          anycast_gateway_mac: "2020.0000.0907"
+          replication_mode: multicast
+          aiml_qos: true
+          aiml_qos_policy: 100G
+  register: enum_test8_result
+
+- name: Verify Enums Test 8 - aimlVxlanEbgp fabric type
+  assert:
+    that:
+      - enum_test8_result is changed
+      - enum_test8_result.response is defined
+    fail_msg: "aimlVxlanEbgp fabric type enum failed"
+    success_msg: "aimlVxlanEbgp fabric type enum validated"
+
+- name: Test Enums 9 - FabricType enum values (classicLan)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-type-classic-lan"
+        category: fabric
+        security_domain: all
+        management:
+          type: classicLan
+          bgp_asn: "65908"
+          anycast_gateway_mac: "2020.0000.0908"
+          replication_mode: ingress
+          stp_root_option: mst
+  register: enum_test9_result
+
+- name: Verify Enums Test 9 - classicLan fabric type
+  assert:
+    that:
+      - enum_test9_result is changed
+      - enum_test9_result.response is defined
+    fail_msg: "classicLan fabric type enum failed"
+    success_msg: "classicLan fabric type enum validated"
+
+- name: Test Enums 10 - FabricType enum values (external)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-type-external"
+        category: fabric
+        security_domain: all
+        management:
+          type: external
+          bgp_asn: "65909"
+          anycast_gateway_mac: "2020.0000.0909"
+          replication_mode: multicast
+  register: enum_test10_result
+
+- name: Verify Enums Test 10 - external fabric type
+  assert:
+    that:
+      - enum_test10_result is changed
+      - enum_test10_result.response is defined
+    fail_msg: "external fabric type enum failed"
+    success_msg: "external fabric type enum validated"
+
+- name: Test Enums 11 - IsisLevel enum values (level-1)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-isis-level1"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65910"
+          anycast_gateway_mac: "2020.0000.0910"
+          replication_mode: ingress
+          link_state_routing_protocol: is-is
+          isis_level: level-1
+  register: enum_test11_result
+
+- name: Verify Enums Test 11 - level-1 ISIS level
+  assert:
+    that:
+      - enum_test11_result is changed
+      - enum_test11_result.response is defined
+    fail_msg: "level-1 ISIS level enum failed"
+    success_msg: "level-1 ISIS level enum validated"
+
+- name: Test Enums 12 - IsisLevel enum values (level-2)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-isis-level2"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65911"
+          anycast_gateway_mac: "2020.0000.0911"
+          replication_mode: multicast
+          link_state_routing_protocol: is-is
+          isis_level: level-2
+  register: enum_test12_result
+
+- name: Verify Enums Test 12 - level-2 ISIS level
+  assert:
+    that:
+      - enum_test12_result is changed
+      - enum_test12_result.response is defined
+    fail_msg: "level-2 ISIS level enum failed"
+    success_msg: "level-2 ISIS level enum validated"
+
+- name: Test Enums 13 - LinkStateRoutingProtocol enum values (ospf)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-ospf"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65912"
+          anycast_gateway_mac: "2020.0000.0912"
+          replication_mode: ingress
+          link_state_routing_protocol: ospf
+          ospf_area_id: "0.0.0.0"
+  register: enum_test13_result
+
+- name: Verify Enums Test 13 - ospf routing protocol
+  assert:
+    that:
+      - enum_test13_result is changed
+      - enum_test13_result.response is defined
+    fail_msg: "ospf routing protocol enum failed"
+    success_msg: "ospf routing protocol enum validated"
+
+- name: Test Enums 14 - LinkStateRoutingProtocol enum values (is-is)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-isis"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65913"
+          anycast_gateway_mac: "2020.0000.0913"
+          replication_mode: multicast
+          link_state_routing_protocol: is-is
+          isis_level: level-1
+  register: enum_test14_result
+
+- name: Verify Enums Test 14 - is-is routing protocol
+  assert:
+    that:
+      - enum_test14_result is changed
+      - enum_test14_result.response is defined
+    fail_msg: "is-is routing protocol enum failed"
+    success_msg: "is-is routing protocol enum validated"
+
+- name: Test Enums 15 - OverlayMode enum values (configProfile)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-overlay-config"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65914"
+          anycast_gateway_mac: "2020.0000.0914"
+          replication_mode: ingress
+          overlay_mode: configProfile
+  register: enum_test15_result
+
+- name: Verify Enums Test 15 - configProfile overlay mode
+  assert:
+    that:
+      - enum_test15_result is changed
+      - enum_test15_result.response is defined
+    fail_msg: "configProfile overlay mode enum failed"
+    success_msg: "configProfile overlay mode enum validated"
+
+- name: Test Enums 16 - OverlayMode enum values (cli)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-overlay-cli"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65915"
+          anycast_gateway_mac: "2020.0000.0915"
+          replication_mode: multicast
+          overlay_mode: cli
+  register: enum_test16_result
+
+- name: Verify Enums Test 16 - cli overlay mode
+  assert:
+    that:
+      - enum_test16_result is changed
+      - enum_test16_result.response is defined
+    fail_msg: "cli overlay mode enum failed"
+    success_msg: "cli overlay mode enum validated"
+
+- name: Test Enums 17 - PowerRedundancyMode enum values
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-power-combined"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65916"
+          anycast_gateway_mac: "2020.0000.0916"
+          replication_mode: ingress
+          power_redundancy_mode: combined
+  register: enum_test17_result
+
+- name: Verify Enums Test 17 - combined power redundancy
+  assert:
+    that:
+      - enum_test17_result is changed
+      - enum_test17_result.response is defined
+    fail_msg: "combined power redundancy enum failed"
+    success_msg: "combined power redundancy enum validated"
+
+- name: Test Enums 18 - QosPolicy enum values (25G)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-qos-25g"
+        category: fabric
+        security_domain: all
+        management:
+          type: aimlVxlanEbgp
+          bgp_asn: "65917"
+          anycast_gateway_mac: "2020.0000.0917"
+          replication_mode: multicast
+          aiml_qos: true
+          aiml_qos_policy: 25G
+  register: enum_test18_result
+
+- name: Verify Enums Test 18 - 25G QoS policy
+  assert:
+    that:
+      - enum_test18_result is changed
+      - enum_test18_result.response is defined
+    fail_msg: "25G QoS policy enum failed"
+    success_msg: "25G QoS policy enum validated"
+
+- name: Test Enums 19 - QosPolicy enum values (400G)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-qos-400g"
+        category: fabric
+        security_domain: all
+        management:
+          type: aimlVxlanEbgp
+          bgp_asn: "65918"
+          anycast_gateway_mac: "2020.0000.0918"
+          replication_mode: ingress
+          aiml_qos: true
+          aiml_qos_policy: 400G
+  register: enum_test19_result
+
+- name: Verify Enums Test 19 - 400G QoS policy
+  assert:
+    that:
+      - enum_test19_result is changed
+      - enum_test19_result.response is defined
+    fail_msg: "400G QoS policy enum failed"
+    success_msg: "400G QoS policy enum validated"
+
+- name: Test Enums 20 - ReplicationMode enum values (ingress)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-replication-ingress"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65919"
+          anycast_gateway_mac: "2020.0000.0919"
+          replication_mode: ingress
+  register: enum_test20_result
+
+- name: Verify Enums Test 20 - ingress replication mode
+  assert:
+    that:
+      - enum_test20_result is changed
+      - enum_test20_result.response is defined
+    fail_msg: "ingress replication mode enum failed"
+    success_msg: "ingress replication mode enum validated"
+
+- name: Test Enums 21 - ReplicationMode enum values (multicast)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-replication-multicast"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65920"
+          anycast_gateway_mac: "2020.0000.0920"
+          replication_mode: multicast
+  register: enum_test21_result
+
+- name: Verify Enums Test 21 - multicast replication mode
+  assert:
+    that:
+      - enum_test21_result is changed
+      - enum_test21_result.response is defined
+    fail_msg: "multicast replication mode enum failed"
+    success_msg: "multicast replication mode enum validated"
+
+- name: Test Enums 22 - StpRootOption enum values (mst)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-stp-mst"
+        category: fabric
+        security_domain: all
+        management:
+          type: classicLan
+          bgp_asn: "65921"
+          anycast_gateway_mac: "2020.0000.0921"
+          replication_mode: ingress
+          stp_root_option: mst
+  register: enum_test22_result
+
+- name: Verify Enums Test 22 - mst STP root option
+  assert:
+    that:
+      - enum_test22_result is changed
+      - enum_test22_result.response is defined
+    fail_msg: "mst STP root option enum failed"
+    success_msg: "mst STP root option enum validated"
+
+- name: Test Enums 23 - StpRootOption enum values (rpvst+)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-stp-rpvst"
+        category: fabric
+        security_domain: all
+        management:
+          type: classicLan
+          bgp_asn: "65922"
+          anycast_gateway_mac: "2020.0000.0922"
+          replication_mode: multicast
+          stp_root_option: "rpvst+"
+  register: enum_test23_result
+
+- name: Verify Enums Test 23 - rpvst+ STP root option
+  assert:
+    that:
+      - enum_test23_result is changed
+      - enum_test23_result.response is defined
+    fail_msg: "rpvst+ STP root option enum failed"
+    success_msg: "rpvst+ STP root option enum validated"
+
+- name: Clean up enum test fabrics
+  cisco.nd.nd_manage_fabric:
+    state: deleted
+    config:
+      - name: "{{ test_fabric_prefix }}-enum-bgp-auth-3des"
+      - name: "{{ test_fabric_prefix }}-enum-interface-numbered"
+      - name: "{{ test_fabric_prefix }}-enum-interface-unnumbered"
+      - name: "{{ test_fabric_prefix }}-enum-interface-p2p"
+      - name: "{{ test_fabric_prefix }}-enum-type-vxlan-ibgp"
+      - name: "{{ test_fabric_prefix }}-enum-type-vxlan-ebgp"
+      - name: "{{ test_fabric_prefix }}-enum-type-aiml-ibgp"
+      - name: "{{ test_fabric_prefix }}-enum-type-aiml-ebgp"
+      - name: "{{ test_fabric_prefix }}-enum-type-classic-lan"
+      - name: "{{ test_fabric_prefix }}-enum-type-external"
+      - name: "{{ test_fabric_prefix }}-enum-isis-level1"
+      - name: "{{ test_fabric_prefix }}-enum-isis-level2"
+      - name: "{{ test_fabric_prefix }}-enum-ospf"
+      - name: "{{ test_fabric_prefix }}-enum-isis"
+      - name: "{{ test_fabric_prefix }}-enum-overlay-config"
+      - name: "{{ test_fabric_prefix }}-enum-overlay-cli"
+      - name: "{{ test_fabric_prefix }}-enum-power-combined"
+      - name: "{{ test_fabric_prefix }}-enum-qos-25g"
+      - name: "{{ test_fabric_prefix }}-enum-qos-400g"
+      - name: "{{ test_fabric_prefix }}-enum-replication-ingress"
+      - name: "{{ test_fabric_prefix }}-enum-replication-multicast"
+      - name: "{{ test_fabric_prefix }}-enum-stp-mst"
+      - name: "{{ test_fabric_prefix }}-enum-stp-rpvst"
+  register: enum_cleanup_result
+  ignore_errors: true
+
+- name: Display enum validation test results
+  debug:
+    msg:
+      - "Enum value tests completed"
+      - "All enum field values from Pydantic models tested successfully"
+      - "BgpAuthenticationKeyType, FabricInterfaceType, FabricType, IsisLevel, LinkStateRoutingProtocol, OverlayMode, PowerRedundancyMode, QosPolicy, ReplicationMode, and StpRootOption enums validated"
+      - "Cleanup completed: {{ enum_cleanup_result.changed | default(false) }}"

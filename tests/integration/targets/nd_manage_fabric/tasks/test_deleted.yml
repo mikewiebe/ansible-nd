@@ -1,0 +1,197 @@
+---
+# Deleted state tests for nd_manage_fabric module
+# Tests fabric deletion operations
+
+- name: Test Deleted 1 - Delete specific fabric by name
+  cisco.nd.nd_manage_fabric:
+    state: deleted
+    config:
+      - name: "{{ basic_fabric_config.name }}"
+  register: deleted_test1_result
+
+- name: Verify Deleted Test 1 - Specific fabric deletion
+  assert:
+    that:
+      - deleted_test1_result is changed
+      - deleted_test1_result.response is defined
+    fail_msg: "Specific fabric deletion failed"
+    success_msg: "Specific fabric deleted successfully"
+
+- name: Test Deleted 2 - Query to verify fabric deletion
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics?name={{ basic_fabric_config.name }}
+  register: deleted_test2_result
+
+- name: Verify Deleted Test 2 - Deletion verification
+  assert:
+    that:
+      - deleted_test2_result is not changed
+      - deleted_test2_result.jsondata is defined
+      - deleted_test2_result.jsondata | length == 0
+    fail_msg: "Fabric deletion verification failed"
+    success_msg: "Fabric deletion verified"
+
+- name: Test Deleted 3 - Delete multiple specific fabrics
+  cisco.nd.nd_manage_fabric:
+    state: deleted
+    config:
+      - name: "{{ aiml_fabric_config.name }}"
+      - name: "{{ ebgp_fabric_config.name }}"
+      - name: "{{ campus_fabric_config.name }}"
+  register: deleted_test3_result
+
+- name: Verify Deleted Test 3 - Multiple fabrics deletion
+  assert:
+    that:
+      - deleted_test3_result is changed
+      - deleted_test3_result.response is defined
+    fail_msg: "Multiple fabrics deletion failed"
+    success_msg: "Multiple fabrics deleted successfully"
+
+- name: Test Deleted 4 - Query to verify multiple deletions
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics?name={{ aiml_fabric_config.name }},{{ ebgp_fabric_config.name }},{{ campus_fabric_config.name }}
+  register: deleted_test4_result
+
+- name: Verify Deleted Test 4 - Multiple deletions verification
+  assert:
+    that:
+      - deleted_test4_result is not changed
+      - deleted_test4_result.response is defined
+      - deleted_test4_result.response | length == 0
+    fail_msg: "Multiple deletions verification failed"
+    success_msg: "Multiple deletions verified"
+
+- name: Test Deleted 5 - Attempt to delete non-existent fabric
+  cisco.nd.nd_manage_fabric:
+    state: deleted
+    config:
+      - name: "non-existent-fabric-{{ ansible_date_time.epoch }}"
+  register: deleted_test5_result
+  ignore_errors: true
+
+- name: Verify Deleted Test 5 - Non-existent fabric deletion handling
+  assert:
+    that:
+      - deleted_test5_result is not changed
+    fail_msg: "Non-existent fabric deletion not handled properly"
+    success_msg: "Non-existent fabric deletion handled correctly"
+
+- name: Test Deleted 6 - Delete with category filter (should fail as unsupported)
+  cisco.nd.nd_manage_fabric:
+    state: deleted
+    config:
+      - category: fabric
+  register: deleted_test6_result
+  ignore_errors: true
+
+- name: Verify Deleted Test 6 - Invalid deletion parameters
+  assert:
+    that:
+      - deleted_test6_result is failed or deleted_test6_result is not changed
+    fail_msg: "Invalid deletion parameters not handled properly"
+    success_msg: "Invalid deletion parameters handled correctly"
+
+- name: Test Deleted 7 - Idempotency check on already deleted fabric
+  cisco.nd.nd_manage_fabric:
+    state: deleted
+    config:
+      - name: "{{ basic_fabric_config.name }}"
+  register: deleted_test7_result
+
+- name: Verify Deleted Test 7 - Deletion idempotency
+  assert:
+    that:
+      - deleted_test7_result is not changed
+    fail_msg: "Deletion idempotency test failed"
+    success_msg: "Deletion idempotency test passed"
+
+# Create test fabrics for batch deletion testing
+- name: Setup fabrics for batch deletion test
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-delete-batch1"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65601"
+          anycast_gateway_mac: "2020.0000.0601"
+          replication_mode: ingress
+      - name: "{{ test_fabric_prefix }}-delete-batch2"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65602"
+          anycast_gateway_mac: "2020.0000.0602"
+          replication_mode: multicast
+      - name: "{{ test_fabric_prefix }}-delete-batch3"
+        category: fabric
+        security_domain: all
+        management:
+          type: aimlVxlanEbgp
+          bgp_asn: "65603"
+          anycast_gateway_mac: "2020.0000.0603"
+          replication_mode: ingress
+          aiml_qos: true
+  register: setup_batch_fabrics
+
+- name: Test Deleted 8 - Batch deletion of created fabrics
+  cisco.nd.nd_manage_fabric:
+    state: deleted
+    config:
+      - name: "{{ test_fabric_prefix }}-delete-batch1"
+      - name: "{{ test_fabric_prefix }}-delete-batch2"
+      - name: "{{ test_fabric_prefix }}-delete-batch3"
+  register: deleted_test8_result
+
+- name: Verify Deleted Test 8 - Batch deletion
+  assert:
+    that:
+      - deleted_test8_result is changed
+      - deleted_test8_result.response is defined
+    fail_msg: "Batch deletion failed"
+    success_msg: "Batch deletion successful"
+
+- name: Test Deleted 9 - Verify batch deletion cleanup
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics?name={{ test_fabric_prefix }}-delete-batch1,{{ test_fabric_prefix }}-delete-batch2,{{ test_fabric_prefix }}-delete-batch3
+  register: deleted_test9_result
+
+- name: Verify Deleted Test 9 - Batch deletion verification
+  assert:
+    that:
+      - deleted_test9_result is not changed
+      - deleted_test9_result.response is defined
+      - deleted_test9_result.response | length == 0
+    fail_msg: "Batch deletion verification failed"
+    success_msg: "Batch deletion verified"
+
+- name: Test Deleted 10 - Delete all remaining test fabrics (cleanup)
+  cisco.nd.nd_manage_fabric:
+    state: deleted
+    config:
+      - name: "{{ advanced_fabric_config.name }}"
+      - name: "{{ external_fabric_config.name }}"
+  register: deleted_test10_result
+  ignore_errors: true
+
+- name: Verify Deleted Test 10 - Final cleanup
+  assert:
+    that:
+      - deleted_test10_result is defined
+    fail_msg: "Final cleanup attempt failed"
+    success_msg: "Final cleanup completed"
+
+- name: Display deleted test results summary
+  debug:
+    msg:
+      - "Deleted state tests completed"
+      - "All deletion scenarios tested successfully"
+      - "Single fabric, multiple fabrics, batch deletion, and error handling verified"
+      - "Idempotency and non-existent fabric handling tested"

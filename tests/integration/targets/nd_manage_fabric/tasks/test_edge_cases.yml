@@ -1,0 +1,416 @@
+---
+# Edge case tests for nd_manage_fabric module
+# Tests boundary conditions and unusual scenarios
+
+- name: Test Edge Case 1 - Minimum valid BGP ASN
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-edge-min-asn"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "1"  # Minimum valid ASN
+          anycast_gateway_mac: "2020.0000.1000"
+          replication_mode: ingress
+  register: edge_test1_result
+
+- name: Verify Edge Case Test 1 - Minimum BGP ASN
+  assert:
+    that:
+      - edge_test1_result is changed
+      - edge_test1_result.response is defined
+    fail_msg: "Minimum BGP ASN edge case failed"
+    success_msg: "Minimum BGP ASN edge case passed"
+
+- name: Test Edge Case 2 - Maximum valid BGP ASN
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-edge-max-asn"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "4294967295"  # Maximum valid 32-bit ASN
+          anycast_gateway_mac: "2020.0000.1001"
+          replication_mode: multicast
+  register: edge_test2_result
+
+- name: Verify Edge Case Test 2 - Maximum BGP ASN
+  assert:
+    that:
+      - edge_test2_result is changed
+      - edge_test2_result.response is defined
+    fail_msg: "Maximum BGP ASN edge case failed"
+    success_msg: "Maximum BGP ASN edge case passed"
+
+- name: Test Edge Case 3 - Minimum valid MTU
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-edge-min-mtu"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "66001"
+          anycast_gateway_mac: "2020.0000.1002"
+          replication_mode: ingress
+          fabric_mtu: 1500  # Minimum common MTU
+  register: edge_test3_result
+
+- name: Verify Edge Case Test 3 - Minimum MTU
+  assert:
+    that:
+      - edge_test3_result is changed
+      - edge_test3_result.response is defined
+    fail_msg: "Minimum MTU edge case failed"
+    success_msg: "Minimum MTU edge case passed"
+
+- name: Test Edge Case 4 - Maximum valid MTU
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-edge-max-mtu"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "66002"
+          anycast_gateway_mac: "2020.0000.1003"
+          replication_mode: multicast
+          fabric_mtu: 9216  # Maximum jumbo frame MTU
+  register: edge_test4_result
+
+- name: Verify Edge Case Test 4 - Maximum MTU
+  assert:
+    that:
+      - edge_test4_result is changed
+      - edge_test4_result.response is defined
+    fail_msg: "Maximum MTU edge case failed"
+    success_msg: "Maximum MTU edge case passed"
+
+- name: Test Edge Case 5 - Extreme latitude values
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-edge-extreme-lat"
+        category: fabric
+        security_domain: all
+        location:
+          latitude: -90.0   # South pole
+          longitude: 0.0
+        management:
+          type: vxlanEbgp
+          bgp_asn: "66003"
+          anycast_gateway_mac: "2020.0000.1004"
+          replication_mode: ingress
+  register: edge_test5_result
+
+- name: Verify Edge Case Test 5 - Extreme latitude
+  assert:
+    that:
+      - edge_test5_result is changed
+      - edge_test5_result.response is defined
+    fail_msg: "Extreme latitude edge case failed"
+    success_msg: "Extreme latitude edge case passed"
+
+- name: Test Edge Case 6 - Extreme longitude values
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-edge-extreme-lng"
+        category: fabric
+        security_domain: all
+        location:
+          latitude: 0.0
+          longitude: -180.0  # International date line
+        management:
+          type: vxlanEbgp
+          bgp_asn: "66004"
+          anycast_gateway_mac: "2020.0000.1005"
+          replication_mode: multicast
+  register: edge_test6_result
+
+- name: Verify Edge Case Test 6 - Extreme longitude
+  assert:
+    that:
+      - edge_test6_result is changed
+      - edge_test6_result.response is defined
+    fail_msg: "Extreme longitude edge case failed"
+    success_msg: "Extreme longitude edge case passed"
+
+- name: Test Edge Case 7 - Minimum VPC delay restore timer
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-edge-min-vpc-timer"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "66005"
+          anycast_gateway_mac: "2020.0000.1006"
+          replication_mode: ingress
+          vpc_delay_restore_timer: 5  # Minimum timer value
+  register: edge_test7_result
+
+- name: Verify Edge Case Test 7 - Minimum VPC timer
+  assert:
+    that:
+      - edge_test7_result is changed
+      - edge_test7_result.response is defined
+    fail_msg: "Minimum VPC timer edge case failed"
+    success_msg: "Minimum VPC timer edge case passed"
+
+- name: Test Edge Case 8 - Maximum VPC delay restore timer
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-edge-max-vpc-timer"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "66006"
+          anycast_gateway_mac: "2020.0000.1007"
+          replication_mode: multicast
+          vpc_delay_restore_timer: 3600  # Maximum timer value (1 hour)
+  register: edge_test8_result
+
+- name: Verify Edge Case Test 8 - Maximum VPC timer
+  assert:
+    that:
+      - edge_test8_result is changed
+      - edge_test8_result.response is defined
+    fail_msg: "Maximum VPC timer edge case failed"
+    success_msg: "Maximum VPC timer edge case passed"
+
+- name: Test Edge Case 9 - Large VNI ranges
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-edge-large-vni"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "66007"
+          anycast_gateway_mac: "2020.0000.1008"
+          replication_mode: ingress
+          l3_vni_range: "1000000-1999999"  # Large range
+          l2_vni_range: "2000000-2999999"
+  register: edge_test9_result
+
+- name: Verify Edge Case Test 9 - Large VNI ranges
+  assert:
+    that:
+      - edge_test9_result is changed
+      - edge_test9_result.response is defined
+    fail_msg: "Large VNI ranges edge case failed"
+    success_msg: "Large VNI ranges edge case passed"
+
+- name: Test Edge Case 10 - Small VNI ranges (single value)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-edge-small-vni"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "66008"
+          anycast_gateway_mac: "2020.0000.1009"
+          replication_mode: multicast
+          l3_vni_range: "100000-100000"  # Single value range
+          l2_vni_range: "200000-200000"
+  register: edge_test10_result
+
+- name: Verify Edge Case Test 10 - Small VNI ranges
+  assert:
+    that:
+      - edge_test10_result is changed
+      - edge_test10_result.response is defined
+    fail_msg: "Small VNI ranges edge case failed"
+    success_msg: "Small VNI ranges edge case passed"
+
+- name: Test Edge Case 11 - All boolean flags enabled
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-edge-all-bools-true"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "66009"
+          anycast_gateway_mac: "2020.0000.1010"
+          replication_mode: ingress
+          bfd: true
+          bfd_ibgp: true
+          bfd_pim: true
+          bfd_isis: true
+          bfd_ospf: true
+          security_group_tag: true
+          macsec: true
+          performance_monitoring: true
+          real_time_interface_statistics_collection: true
+          strict_config_compliance_mode: true
+          cdp: true
+          snmp_trap: true
+  register: edge_test11_result
+
+- name: Verify Edge Case Test 11 - All boolean flags enabled
+  assert:
+    that:
+      - edge_test11_result is changed
+      - edge_test11_result.response is defined
+    fail_msg: "All boolean flags enabled edge case failed"
+    success_msg: "All boolean flags enabled edge case passed"
+
+- name: Test Edge Case 12 - All boolean flags disabled
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-edge-all-bools-false"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "66010"
+          anycast_gateway_mac: "2020.0000.1011"
+          replication_mode: multicast
+          bfd: false
+          bfd_ibgp: false
+          bfd_pim: false
+          bfd_isis: false
+          bfd_ospf: false
+          security_group_tag: false
+          macsec: false
+          performance_monitoring: false
+          real_time_interface_statistics_collection: false
+          strict_config_compliance_mode: false
+          cdp: false
+          snmp_trap: false
+  register: edge_test12_result
+
+- name: Verify Edge Case Test 12 - All boolean flags disabled
+  assert:
+    that:
+      - edge_test12_result is changed
+      - edge_test12_result.response is defined
+    fail_msg: "All boolean flags disabled edge case failed"
+    success_msg: "All boolean flags disabled edge case passed"
+
+- name: Test Edge Case 13 - Complex fabric name with special characters
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-edge_with-special.chars"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "66011"
+          anycast_gateway_mac: "2020.0000.1012"
+          replication_mode: ingress
+  register: edge_test13_result
+
+- name: Verify Edge Case Test 13 - Special characters in name
+  assert:
+    that:
+      - edge_test13_result is changed
+      - edge_test13_result.response is defined
+    fail_msg: "Special characters in name edge case failed"
+    success_msg: "Special characters in name edge case passed"
+
+- name: Test Edge Case 14 - Very long fabric name
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-edge-very-long-fabric-name-with-many-characters-to-test-name-length-limits"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "66012"
+          anycast_gateway_mac: "2020.0000.1013"
+          replication_mode: multicast
+  register: edge_test14_result
+
+- name: Verify Edge Case Test 14 - Very long name
+  assert:
+    that:
+      - edge_test14_result is changed
+      - edge_test14_result.response is defined
+    fail_msg: "Very long name edge case failed"
+    success_msg: "Very long name edge case passed"
+
+- name: Test Edge Case 15 - Rapid consecutive operations
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-edge-rapid1"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "66013"
+          anycast_gateway_mac: "2020.0000.1014"
+          replication_mode: ingress
+  register: edge_test15a_result
+
+- name: Test Edge Case 15b - Immediate modification
+  cisco.nd.nd_manage_fabric:
+    state: replaced
+    config:
+      - name: "{{ test_fabric_prefix }}-edge-rapid1"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "66014"
+          anycast_gateway_mac: "2020.0000.1015"
+          replication_mode: multicast
+  register: edge_test15b_result
+
+- name: Verify Edge Case Test 15 - Rapid consecutive operations
+  assert:
+    that:
+      - edge_test15a_result is changed
+      - edge_test15b_result is changed
+    fail_msg: "Rapid consecutive operations edge case failed"
+    success_msg: "Rapid consecutive operations edge case passed"
+
+- name: Clean up edge case test fabrics
+  cisco.nd.nd_manage_fabric:
+    state: deleted
+    config:
+      - name: "{{ test_fabric_prefix }}-edge-min-asn"
+      - name: "{{ test_fabric_prefix }}-edge-max-asn"
+      - name: "{{ test_fabric_prefix }}-edge-min-mtu"
+      - name: "{{ test_fabric_prefix }}-edge-max-mtu"
+      - name: "{{ test_fabric_prefix }}-edge-extreme-lat"
+      - name: "{{ test_fabric_prefix }}-edge-extreme-lng"
+      - name: "{{ test_fabric_prefix }}-edge-min-vpc-timer"
+      - name: "{{ test_fabric_prefix }}-edge-max-vpc-timer"
+      - name: "{{ test_fabric_prefix }}-edge-large-vni"
+      - name: "{{ test_fabric_prefix }}-edge-small-vni"
+      - name: "{{ test_fabric_prefix }}-edge-all-bools-true"
+      - name: "{{ test_fabric_prefix }}-edge-all-bools-false"
+      - name: "{{ test_fabric_prefix }}-edge_with-special.chars"
+      - name: "{{ test_fabric_prefix }}-edge-very-long-fabric-name-with-many-characters-to-test-name-length-limits"
+      - name: "{{ test_fabric_prefix }}-edge-rapid1"
+  register: edge_cleanup_result
+  ignore_errors: true
+
+- name: Display edge case test results
+  debug:
+    msg:
+      - "Edge case tests completed"
+      - "All boundary conditions and unusual scenarios tested"
+      - "Minimum/maximum values, extreme coordinates, complex names, and rapid operations verified"
+      - "Module handles edge cases gracefully"
+      - "Cleanup completed: {{ edge_cleanup_result.changed | default(false) }}"

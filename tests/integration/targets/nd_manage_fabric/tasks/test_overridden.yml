@@ -1,0 +1,261 @@
+---
+# Overridden state tests for nd_manage_fabric module
+# Tests complete fabric configuration override
+
+- name: Test Overridden 1 - Override with single fabric configuration
+  cisco.nd.nd_manage_fabric:
+    state: overridden
+    config:
+      - name: "{{ test_fabric_prefix }}-overridden-single"
+        category: fabric
+        security_domain: all
+        alert_suspend: disabled
+        location:
+          latitude: 40.7128
+          longitude: -74.0060
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65100"
+          anycast_gateway_mac: "2020.0000.0100"
+          replication_mode: ingress
+          fabric_interface_type: p2p
+          link_state_routing_protocol: ospf
+          ospf_area_id: "0.0.0.0"
+          overlay_mode: configProfile
+          bfd: true
+          bfd_ibgp: true
+  register: overridden_test1_result
+
+- name: Verify Overridden Test 1 - Single fabric override
+  assert:
+    that:
+      - overridden_test1_result is changed
+      - overridden_test1_result.response is defined
+    fail_msg: "Single fabric override failed"
+    success_msg: "Single fabric override successful"
+
+- name: Test Overridden 2 - Query after single override
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics
+  register: overridden_test2_result
+
+- name: Verify Overridden Test 2 - Post-override fabric count
+  assert:
+    that:
+      - overridden_test2_result is not changed
+      - overridden_test2_result.jsondata is defined
+    fail_msg: "Post-override query failed"
+    success_msg: "Post-override query successful"
+
+- name: Test Overridden 3 - Override with multiple fabric configurations
+  cisco.nd.nd_manage_fabric:
+    state: overridden
+    config:
+      - name: "{{ test_fabric_prefix }}-overridden-multi1"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65200"
+          anycast_gateway_mac: "2020.0000.0200"
+          replication_mode: multicast
+          fabric_interface_type: unNumbered
+          link_state_routing_protocol: is-is
+          isis_level: level-1
+          bfd: true
+      - name: "{{ test_fabric_prefix }}-overridden-multi2"
+        category: fabric
+        security_domain: all
+        management:
+          type: aimlVxlanEbgp
+          bgp_asn: "65300"
+          anycast_gateway_mac: "2020.0000.0300"
+          replication_mode: ingress
+          fabric_interface_type: p2p
+          link_state_routing_protocol: ospf
+          ospf_area_id: "0.0.0.1"
+          aiml_qos: true
+          aiml_qos_policy: 100G
+      - name: "{{ test_fabric_prefix }}-overridden-multi3"
+        category: fabric
+        security_domain: all
+        management:
+          type: classicLan
+          bgp_asn: "65400"
+          anycast_gateway_mac: "2020.0000.0400"
+          replication_mode: multicast
+          stp_root_option: mst
+          cdp: true
+  register: overridden_test3_result
+
+- name: Verify Overridden Test 3 - Multiple fabrics override
+  assert:
+    that:
+      - overridden_test3_result is changed
+      - overridden_test3_result.response is defined
+    fail_msg: "Multiple fabrics override failed"
+    success_msg: "Multiple fabrics override successful"
+
+- name: Test Overridden 4 - Query after multiple override
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics
+  register: overridden_test4_result
+
+- name: Verify Overridden Test 4 - Post-multiple-override fabric count
+  assert:
+    that:
+      - overridden_test4_result is not changed
+      - overridden_test4_result.jsondata is defined
+      - overridden_test4_result.jsondata | length >= 3
+    fail_msg: "Post-multiple-override query failed"
+    success_msg: "Post-multiple-override query successful"
+
+- name: Test Overridden 5 - Idempotency check on overridden configuration
+  cisco.nd.nd_manage_fabric:
+    state: overridden
+    config:
+      - name: "{{ test_fabric_prefix }}-overridden-multi1"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanEbgp
+          bgp_asn: "65200"
+          anycast_gateway_mac: "2020.0000.0200"
+          replication_mode: multicast
+          fabric_interface_type: unNumbered
+          link_state_routing_protocol: is-is
+          isis_level: level-1
+          bfd: true
+      - name: "{{ test_fabric_prefix }}-overridden-multi2"
+        category: fabric
+        security_domain: all
+        management:
+          type: aimlVxlanEbgp
+          bgp_asn: "65300"
+          anycast_gateway_mac: "2020.0000.0300"
+          replication_mode: ingress
+          fabric_interface_type: p2p
+          link_state_routing_protocol: ospf
+          ospf_area_id: "0.0.0.1"
+          aiml_qos: true
+          aiml_qos_policy: 100G
+      - name: "{{ test_fabric_prefix }}-overridden-multi3"
+        category: fabric
+        security_domain: all
+        management:
+          type: classicLan
+          bgp_asn: "65400"
+          anycast_gateway_mac: "2020.0000.0400"
+          replication_mode: multicast
+          stp_root_option: mst
+          cdp: true
+  register: overridden_test5_result
+
+- name: Verify Overridden Test 5 - Idempotency on overridden config
+  assert:
+    that:
+      - overridden_test5_result is not changed
+    fail_msg: "Overridden idempotency test failed"
+    success_msg: "Overridden idempotency test passed"
+
+- name: Test Overridden 6 - Override with comprehensive configuration
+  cisco.nd.nd_manage_fabric:
+    state: overridden
+    config:
+      - name: "{{ test_fabric_prefix }}-overridden-comprehensive"
+        category: fabric
+        security_domain: all
+        alert_suspend: disabled
+        location:
+          latitude: 51.5074
+          longitude: -0.1278
+        management:
+          type: aimlVxlanEbgp
+          bgp_asn: "65500"
+          anycast_gateway_mac: "2020.0000.0500"
+          replication_mode: multicast
+          # Comprehensive override configuration
+          fabric_interface_type: p2p
+          fabric_mtu: 9216
+          l2_host_interface_mtu: 9000
+          link_state_routing_protocol: ospf
+          ospf_area_id: "0.0.0.0"
+          overlay_mode: configProfile
+          power_redundancy_mode: combined
+          rendezvous_point_mode: bidir
+          isis_level: level-2
+          stp_root_option: mst
+          vpc_peer_keep_alive_option: loopback
+          allow_vlan_on_leaf_tor_pairing: all
+          # AI/ML specific settings
+          aiml_qos: true
+          aiml_qos_policy: 100G
+          copp_policy: strict
+          # Network ranges
+          l3_vni_range: "70000-79000"
+          l2_vni_range: "50000-69000"
+          vrf_vlan_range: "3000-3199"
+          network_vlan_range: "3200-3999"
+          # VPC settings
+          vpc_layer3_peer_router: true
+          vpc_peer_link_port_channel_id: "700"
+          vpc_peer_link_vlan: "3800"
+          vpc_delay_restore_timer: 300
+          # BFD settings
+          bfd: true
+          bfd_pim: true
+          bfd_isis: true
+          bfd_ospf: true
+          bfd_ibgp: true
+          # Security and monitoring
+          security_group_tag: true
+          macsec: true
+          performance_monitoring: true
+          real_time_interface_statistics_collection: true
+          strict_config_compliance_mode: true
+  register: overridden_test6_result
+
+- name: Verify Overridden Test 6 - Comprehensive override
+  assert:
+    that:
+      - overridden_test6_result is changed
+      - overridden_test6_result.response is defined
+    fail_msg: "Comprehensive override failed"
+    success_msg: "Comprehensive override successful"
+
+- name: Test Overridden 7 - Override with empty configuration (remove all)
+  cisco.nd.nd_manage_fabric:
+    state: overridden
+    config: []
+  register: overridden_test7_result
+
+- name: Verify Overridden Test 7 - Empty override (cleanup)
+  assert:
+    that:
+      - overridden_test7_result is changed
+    fail_msg: "Empty override (cleanup) failed"
+    success_msg: "Empty override (cleanup) successful"
+
+- name: Test Overridden 8 - Query after empty override
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics
+  register: overridden_test8_result
+
+- name: Verify Overridden Test 8 - Post-cleanup query
+  assert:
+    that:
+      - overridden_test8_result is not changed
+      - overridden_test8_result.jsondata is defined
+    fail_msg: "Post-cleanup query failed"
+    success_msg: "Post-cleanup query successful"
+
+- name: Display overridden test results summary
+  debug:
+    msg:
+      - "Overridden state tests completed"
+      - "All override scenarios tested successfully"
+      - "Single fabric, multiple fabrics, and cleanup operations verified"
+      - "Fabric count after cleanup: {{ overridden_test8_result.response | length }}"

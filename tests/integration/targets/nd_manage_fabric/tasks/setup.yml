@@ -1,0 +1,64 @@
+---
+# Setup tasks for nd_manage_fabric tests
+# Ensures clean test environment and validates prerequisites
+
+- name: Print test environment information
+  debug:
+    msg:
+      - "Starting nd_manage_fabric integration tests"
+      - "Test fabric prefix: {{ test_fabric_prefix }}"
+      - "Test domain: {{ test_fabric_domain }}"
+
+- name: Validate ND connection is available
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics
+  register: nd_connection_test
+  ignore_errors: true
+
+- name: Fail if ND connection is not available
+  fail:
+    msg: "Cannot connect to Nexus Dashboard. Please check connection parameters."
+  when: nd_connection_test is failed
+
+- name: Clean up any existing test fabrics before starting tests
+  cisco.nd.nd_manage_fabric:
+    state: overridden
+    config: []
+  register: cleanup_result
+
+- name: Query list of fabrics using cisco.nd.nd_rest
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics
+  register: setup_query
+
+# Result that comes back from ND when no fabrics exist
+# ok: [fabric-stage] => {
+#     "rest_fabrics_result": {
+#         "changed": false,
+#         "current": {
+#             "fabrics": []
+#         },
+#         "data": null,
+#         "failed": false,
+#         "jsondata": {
+#             "fabrics": []
+#         },
+#         "previous": {},
+#         "socket": "/Users/mwiebe/.ansible/pc/e47c2aba77",
+#         "status": 200
+#     }
+# }
+
+# Fail if fabrics are found
+- name: Fail if any existing fabrics found after cleanup attempt
+  fail:
+    msg:
+      - "Existing fabrics found before test run."
+      - "{{ setup_query.jsondata.fabrics | length }} fabrics found."
+  when: setup_query.jsondata.fabrics | length > 0
+
+- name: Display cleanup results
+  debug:
+    msg: "Pre-test cleanup completed. Ready to start tests."

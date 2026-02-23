@@ -1,0 +1,132 @@
+---
+# Merged state tests for nd_manage_fabric module
+# Tests merging configurations and idempotency
+
+- name: Test Merged 1 - Create AI/ML fabric
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - "{{ aiml_fabric_config }}"
+  register: merged_test1_result
+
+- name: Verify Merged Test 1 - AI/ML fabric creation
+  assert:
+    that:
+      - merged_test1_result is changed
+      - merged_test1_result.response is defined
+    fail_msg: "AI/ML fabric creation failed"
+    success_msg: "AI/ML fabric created successfully"
+
+- name: Test Merged 2 - Idempotency check (no changes)
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - "{{ aiml_fabric_config }}"
+  register: merged_test2_result
+
+- name: Verify Merged Test 2 - Idempotency
+  assert:
+    that:
+      - merged_test2_result is not changed
+    fail_msg: "Idempotency test failed - module should not report changes"
+    success_msg: "Idempotency test passed"
+
+- name: Test Merged 3 - Partial update of existing fabric
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ aiml_fabric_config.name }}"
+        management:
+          bgp_asn: "65100"
+          performance_monitoring: false
+          real_time_backup: false
+          copp_policy: dense
+          # aiml_qos_policy: 100G
+  register: merged_test3_result
+
+- name: Verify Merged Test 3 - Partial update
+  assert:
+    that:
+      - merged_test3_result is changed
+      - merged_test3_result.response is defined
+    fail_msg: "Partial update failed"
+    success_msg: "Partial update successful"
+
+- name: Test Merged 4 - Query updated fabric to verify merge
+  cisco.nd.nd_rest:
+    method: GET
+    path: /api/v1/manage/fabrics?name={{ aiml_fabric_config.name }}
+  register: merged_test4_result
+
+- name: Verify Merged Test 4 - Merged configuration
+  assert:
+    that:
+      - merged_test4_result is not changed
+      - merged_test4_result.jsondata is defined
+      - merged_test4_result.jsondata | length == 1
+    fail_msg: "Merged configuration verification failed"
+    success_msg: "Merged configuration verified"
+
+- name: Test Merged 5 - Create multiple fabrics in single task
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - "{{ ebgp_fabric_config }}"
+      - "{{ campus_fabric_config }}"
+  register: merged_test5_result
+
+- name: Verify Merged Test 5 - Multiple fabric creation
+  assert:
+    that:
+      - merged_test5_result is changed
+      - merged_test5_result.response is defined
+    fail_msg: "Multiple fabric creation failed"
+    success_msg: "Multiple fabrics created successfully"
+
+- name: Test Merged 6 - Update with location information
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ ebgp_fabric_config.name }}"
+        location:
+          latitude: 40.7128
+          longitude: -74.0060
+        management:
+          heartbeat_interval: 200
+  register: merged_test6_result
+
+- name: Verify Merged Test 6 - Location update
+  assert:
+    that:
+      - merged_test6_result is changed
+    fail_msg: "Location update failed"
+    success_msg: "Location updated successfully"
+
+- name: Test Merged 7 - Create fabric with server collections
+  cisco.nd.nd_manage_fabric:
+    state: merged
+    config:
+      - name: "{{ test_fabric_prefix }}-merged-update"
+        category: fabric
+        security_domain: all
+        management:
+          type: vxlanIbgp
+          bgp_asn: "65999"
+          ntp_server_collection: ["192.168.1.1", "192.168.1.2"]
+          dns_collection: ["1.1.1.1", "1.0.0.1"]
+          syslog_server_collection: ["192.168.1.10"]
+  register: merged_test7_result
+
+- name: Verify Merged Test 7 - Server collections
+  assert:
+    that:
+      - merged_test7_result is changed
+    fail_msg: "Server collections configuration failed"
+    success_msg: "Server collections configured successfully"
+
+- name: Display merged test results summary
+  debug:
+    msg:
+      - "Merged state tests completed"
+      - "All merged tests executed successfully"
+      - "Fabrics created/updated: {{ [aiml_fabric_config.name, ebgp_fabric_config.name, campus_fabric_config.name, test_fabric_prefix + '-merged-update'] }}"
