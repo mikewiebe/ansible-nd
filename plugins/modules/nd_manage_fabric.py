@@ -372,9 +372,8 @@ from ansible_collections.cisco.nd.plugins.module_utils.ep.ep_api_v1_manage_fabri
 )
 from ansible_collections.cisco.nd.plugins.module_utils.log import Log
 from ansible_collections.cisco.nd.plugins.module_utils.models.manage_fabric import (
-    FabricCreateModel,
+    FabricModel,
     FabricDeleteModel,
-    FabricUpdateModel,
 )
 from ansible_collections.cisco.nd.plugins.module_utils.nd_v2 import (
     NDModule,
@@ -499,7 +498,7 @@ class NDFabricManager:
         """
         # Validate and generate API payload using Pydantic model
         try:
-            fabric_model = FabricCreateModel(**fabric_config)
+            fabric_model = FabricModel(**fabric_config)
             payload = fabric_model.model_dump(by_alias=True, exclude_none=True)
         except Exception as error:
             raise NDModuleError(f"Invalid fabric configuration: {error}") from error
@@ -545,17 +544,10 @@ class NDFabricManager:
 
         # Validate and generate API payload using Pydantic model
         try:
-            fabric_model = FabricCreateModel(**fabric_config)
+            fabric_model = FabricModel(**fabric_config)
             payload = fabric_model.model_dump(by_alias=True, exclude_none=True)
         except Exception as error:
             raise NDModuleError(f"Invalid fabric configuration: {error}") from error
-
-        # # Validate and generate API payload using Pydantic model
-        # try:
-        #     fabric_model = FabricUpdateModel(**fabric_config)
-        #     payload = fabric_model.model_dump(by_alias=True, exclude_none=True)
-        # except Exception as error:
-        #     raise NDModuleError(f"Invalid fabric configuration: {error}") from error
 
         ep = EpApiV1ManageFabricsPut()
         ep.fabric_name = fabric_name
@@ -620,44 +612,6 @@ class NDFabricManager:
         }
         self.results.register_task_result()
 
-    def _filter_update_config(self, fabric_config: dict) -> dict:
-        """
-        # Summary
-
-        Filter fabric configuration to only include fields allowed for updates.
-
-        ## Parameters
-
-        - fabric_config: Full fabric configuration dictionary
-
-        ## Returns
-
-        - Dictionary containing only updateable fields
-
-        ## Raises
-
-        None
-        """
-        # Fields that are allowed in FabricUpdateModel
-        updateable_fields = {
-            'name',
-            'location',
-            'license_tier',
-            'licenseTier',  # Include both snake_case and camelCase versions
-            'alert_suspend',
-            'alertSuspend',
-            'telemetry_collection',
-            'telemetryCollection',
-            'management',
-            'telemetry_settings',
-            'telemetrySettings',
-            'external_streaming_settings',
-            'externalStreamingSettings'
-        }
-
-        # Filter config to only include updateable fields
-        return {k: v for k, v in fabric_config.items() if k in updateable_fields}
-
     def process_state_merged(self, config: list) -> None:
         """
         # Summary
@@ -677,8 +631,6 @@ class NDFabricManager:
             existing_fabric = self._query_fabric(fabric_name)
 
             if existing_fabric:
-                # Update existing fabric - filter config to only include updateable fields
-                update_config = self._filter_update_config(fabric_config)
                 self._update_fabric(fabric_name, update_config)
             else:
                 # Create new fabric
@@ -703,8 +655,6 @@ class NDFabricManager:
             existing_fabric = self._query_fabric(fabric_name)
 
             if existing_fabric:
-                # Replace existing fabric - filter config to only include updateable fields
-                update_config = self._filter_update_config(fabric_config)
                 self._update_fabric(fabric_name, update_config)
             else:
                 # Create new fabric
@@ -739,8 +689,6 @@ class NDFabricManager:
         for fabric_config in config:
             fabric_name = fabric_config["name"]
             if fabric_name in existing_names:
-                # Update existing fabric - filter config to only include updateable fields
-                update_config = self._filter_update_config(fabric_config)
                 self._update_fabric(fabric_name, update_config)
             else:
                 self._create_fabric(fabric_config)
