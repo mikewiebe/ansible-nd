@@ -108,3 +108,27 @@ class BasePath:
         ```
         """
         return cls.nd_manage("inventory", *segments)
+
+    @classmethod
+    def nd_manage_fabrics(cls, *segments: str) -> str:
+        """
+        # Summary
+
+        Build ND manage fabrics API path.
+
+        ## Parameters
+
+        - segments: Path segments to append after fabrics (e.g., "my-fabric")
+
+        ## Returns
+
+        - Complete ND manage fabrics path
+
+        ## Example
+
+        ```python
+        path = BasePath.nd_manage_fabrics("my-fabric")
+        # Returns: /api/v1/manage/fabrics/my-fabric
+        ```
+        """
+        return cls.nd_manage("fabrics", *segments)
