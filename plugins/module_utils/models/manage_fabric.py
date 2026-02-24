@@ -26,8 +26,7 @@ iBGP VXLAN fabrics through the Nexus Dashboard Fabric Controller (NDFC) API.
 - `TelemetrySettingsModel` - Complete telemetry configuration
 - `ExternalStreamingSettingsModel` - External streaming configuration
 - `VxlanIbgpManagementModel` - iBGP VXLAN specific management settings
-- `FabricCreateModel` - Complete fabric creation model
-- `FabricUpdateModel` - Fabric update model
+- `FabricModel` - Complete fabric creation model
 - `FabricDeleteModel` - Fabric deletion model
 
 ## Usage
@@ -43,7 +42,7 @@ fabric_data = {
         "site_id": "65001"
     }
 }
-fabric = FabricCreateModel(**fabric_data)
+fabric = FabricModel(**fabric_data)
 ```
 """
 
@@ -1228,7 +1227,7 @@ class VxlanIbgpManagementModel(NDNestedModel):
         return value.lower()
 
 
-class FabricCreateModel(NDBaseModel):
+class FabricModel(NDBaseModel):
     """
     # Summary
 
@@ -1302,7 +1301,7 @@ class FabricCreateModel(NDBaseModel):
         return value
 
     @model_validator(mode='after')
-    def validate_fabric_consistency(self) -> 'FabricCreateModel':
+    def validate_fabric_consistency(self) -> 'FabricModel':
         """
         # Summary
 
@@ -1336,79 +1335,7 @@ class FabricCreateModel(NDBaseModel):
         return self.model_dump(by_alias=True, exclude_none=True)
 
     @classmethod
-    def from_response(cls, response: Dict[str, Any]) -> 'FabricCreateModel':
-        """
-        # Summary
-
-        Create model instance from API response.
-
-        ## Raises
-
-        - `ValueError` - If response data is invalid or missing required fields
-        """
-        return cls.model_validate(response, by_alias=True)
-
-
-class FabricUpdateModel(NDBaseModel):
-    """
-    # Summary
-
-    Model for updating an existing iBGP VXLAN fabric.
-
-    All fields are optional for updates, allowing partial configuration changes.
-
-    ## Raises
-
-    - `ValueError` - If updated fields are invalid
-    """
-
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
-        use_enum_values=True,
-        validate_assignment=True,
-        populate_by_name=True,
-        extra="forbid"
-    )
-
-    identifiers: ClassVar[List[str]] = ["name"]
-    identifier_strategy: ClassVar[str] = "single"
-
-    # Fabric identification (required for updates)
-    name: str = Field(description="Fabric name to update", min_length=1, max_length=64)
-
-    # Optional update fields
-    location: Optional[LocationModel] = Field(description="Updated geographic location", default=None)
-    license_tier: Optional[LicenseTierEnum] = Field(alias="licenseTier", description="Updated license tier", default=None)
-    alert_suspend: Optional[AlertSuspendEnum] = Field(alias="alertSuspend", description="Updated alert state", default=None)
-    telemetry_collection: Optional[bool] = Field(alias="telemetryCollection", description="Updated telemetry state", default=None)
-
-    # Partial management updates (only specific fields can be updated)
-    management: Optional[Dict[str, Any]] = Field(description="Partial management configuration updates", default=None)
-    telemetry_settings: Optional[TelemetrySettingsModel] = Field(
-        alias="telemetrySettings",
-        description="Updated telemetry settings",
-        default=None
-    )
-    external_streaming_settings: Optional[ExternalStreamingSettingsModel] = Field(
-        alias="externalStreamingSettings",
-        description="Updated streaming settings",
-        default=None
-    )
-
-    def to_payload(self) -> Dict[str, Any]:
-        """
-        # Summary
-
-        Convert model to API payload format.
-
-        ## Raises
-
-        None
-        """
-        return self.model_dump(by_alias=True, exclude_none=True)
-
-    @classmethod
-    def from_response(cls, response: Dict[str, Any]) -> 'FabricUpdateModel':
+    def from_response(cls, response: Dict[str, Any]) -> 'FabricModel':
         """
         # Summary
 
@@ -1506,8 +1433,7 @@ __all__ = [
     "TelemetrySettingsModel",
     "ExternalStreamingSettingsModel",
     "VxlanIbgpManagementModel",
-    "FabricCreateModel",
-    "FabricUpdateModel",
+    "FabricModel",
     "FabricDeleteModel",
     "FabricTypeEnum",
     "AlertSuspendEnum",
