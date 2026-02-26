@@ -49,8 +49,7 @@ fabric = FabricModel(**fabric_data)
 import re
 from datetime import datetime
 from enum import Enum
-from typing import Annotated, ClassVar, Dict, List, Optional, Union, Literal, Any
-from typing_extensions import Self
+from typing import Annotated, Dict, List, Optional, Union, Literal, Any
 
 # This try-except block is used to handle the import of Pydantic.
 # If Pydantic is not available, it will define a minimal BaseModel class
@@ -60,7 +59,6 @@ from typing_extensions import Self
 try:
     from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
     from pydantic.networks import IPvAnyAddress, IPvAnyNetwork
-    from ansible_collections.cisco.nd.plugins.module_utils.models.base import NDBaseModel, NDNestedModel
 except ImportError as imp_exc:
     PYDANTIC_IMPORT_ERROR = imp_exc
 
@@ -103,12 +101,6 @@ except ImportError as imp_exc:
     # Define placeholder types
     IPvAnyAddress = str
     IPvAnyNetwork = str
-
-    class NDBaseModel(BaseModel):
-        pass
-
-    class NDNestedModel(BaseModel):
-        pass
 
 else:
     PYDANTIC_IMPORT_ERROR = None
@@ -208,7 +200,7 @@ class LinkStateRoutingProtocolEnum(str, Enum):
     ISIS = "isis"
 
 
-class LocationModel(NDNestedModel):
+class LocationModel(BaseModel):
     """
     # Summary
 
@@ -218,6 +210,13 @@ class LocationModel(NDNestedModel):
 
     - `ValueError` - If latitude or longitude are outside valid ranges
     """
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+        extra="forbid"
+    )
 
     latitude: float = Field(
         description="Latitude coordinate (-90 to 90)",
@@ -231,7 +230,7 @@ class LocationModel(NDNestedModel):
     )
 
 
-class NetflowExporterModel(NDNestedModel):
+class NetflowExporterModel(BaseModel):
     """
     # Summary
 
@@ -242,6 +241,13 @@ class NetflowExporterModel(NDNestedModel):
     - `ValueError` - If UDP port is outside valid range or IP address is invalid
     """
 
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+        extra="forbid"
+    )
+
     exporter_name: str = Field(alias="exporterName", description="Name of the netflow exporter")
     exporter_ip: str = Field(alias="exporterIp", description="IP address of the netflow collector")
     vrf: str = Field(description="VRF name for the exporter", default="management")
@@ -249,7 +255,7 @@ class NetflowExporterModel(NDNestedModel):
     udp_port: int = Field(alias="udpPort", description="UDP port for netflow export", ge=1, le=65535)
 
 
-class NetflowRecordModel(NDNestedModel):
+class NetflowRecordModel(BaseModel):
     """
     # Summary
 
@@ -260,12 +266,19 @@ class NetflowRecordModel(NDNestedModel):
     None
     """
 
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+        extra="forbid"
+    )
+
     record_name: str = Field(alias="recordName", description="Name of the netflow record")
     record_template: str = Field(alias="recordTemplate", description="Template type for the record")
     layer2_record: bool = Field(alias="layer2Record", description="Enable layer 2 record fields", default=False)
 
 
-class NetflowMonitorModel(NDNestedModel):
+class NetflowMonitorModel(BaseModel):
     """
     # Summary
 
@@ -276,13 +289,20 @@ class NetflowMonitorModel(NDNestedModel):
     None
     """
 
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+        extra="forbid"
+    )
+
     monitor_name: str = Field(alias="monitorName", description="Name of the netflow monitor")
     record_name: str = Field(alias="recordName", description="Associated record name")
     exporter1_name: str = Field(alias="exporter1Name", description="Primary exporter name")
     exporter2_name: str = Field(alias="exporter2Name", description="Secondary exporter name", default="")
 
 
-class NetflowSettingsModel(NDNestedModel):
+class NetflowSettingsModel(BaseModel):
     """
     # Summary
 
@@ -292,6 +312,13 @@ class NetflowSettingsModel(NDNestedModel):
 
     - `ValueError` - If netflow lists are inconsistent with netflow enabled state
     """
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+        extra="forbid"
+    )
 
     netflow: bool = Field(description="Enable netflow collection", default=False)
     netflow_exporter_collection: List[NetflowExporterModel] = Field(
@@ -311,7 +338,7 @@ class NetflowSettingsModel(NDNestedModel):
     )
 
 
-class BootstrapSubnetModel(NDNestedModel):
+class BootstrapSubnetModel(BaseModel):
     """
     # Summary
 
@@ -322,13 +349,20 @@ class BootstrapSubnetModel(NDNestedModel):
     - `ValueError` - If IP addresses or subnet prefix are invalid
     """
 
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+        extra="forbid"
+    )
+
     start_ip: str = Field(alias="startIp", description="Starting IP address of the bootstrap range")
     end_ip: str = Field(alias="endIp", description="Ending IP address of the bootstrap range")
     default_gateway: str = Field(alias="defaultGateway", description="Default gateway for bootstrap subnet")
     subnet_prefix: int = Field(alias="subnetPrefix", description="Subnet prefix length", ge=8, le=30)
 
 
-class FabricDesignSettingsModel(NDNestedModel):
+class FabricDesignSettingsModel(BaseModel):
     """
     # Summary
 
@@ -338,6 +372,13 @@ class FabricDesignSettingsModel(NDNestedModel):
 
     - `ValueError` - If leaf/spine/border counts are invalid
     """
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+        extra="forbid"
+    )
 
     link_capacity: str = Field(alias="linkCapacity", description="Link capacity (e.g., '400Gb')", default="400Gb")
     leaf_count: int = Field(alias="leafCount", description="Number of leaf switches", ge=1, le=128)
@@ -381,7 +422,7 @@ class FabricDesignSettingsModel(NDNestedModel):
     designer_password: Optional[str] = Field(alias="designerPassword", description="Designer password", default=None)
 
 
-class TelemetryFlowCollectionModel(NDNestedModel):
+class TelemetryFlowCollectionModel(BaseModel):
     """
     # Summary
 
@@ -391,6 +432,13 @@ class TelemetryFlowCollectionModel(NDNestedModel):
 
     None
     """
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+        extra="forbid"
+    )
 
     traffic_analytics: str = Field(alias="trafficAnalytics", description="Traffic analytics state", default="enabled")
     traffic_analytics_scope: str = Field(
@@ -402,7 +450,7 @@ class TelemetryFlowCollectionModel(NDNestedModel):
     udp_categorization: str = Field(alias="udpCategorization", description="UDP categorization", default="enabled")
 
 
-class TelemetryMicroburstModel(NDNestedModel):
+class TelemetryMicroburstModel(BaseModel):
     """
     # Summary
 
@@ -413,11 +461,18 @@ class TelemetryMicroburstModel(NDNestedModel):
     None
     """
 
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+        extra="forbid"
+    )
+
     microburst: bool = Field(description="Enable microburst detection", default=False)
     sensitivity: str = Field(description="Microburst sensitivity level", default="low")
 
 
-class TelemetryAnalysisSettingsModel(NDNestedModel):
+class TelemetryAnalysisSettingsModel(BaseModel):
     """
     # Summary
 
@@ -428,10 +483,17 @@ class TelemetryAnalysisSettingsModel(NDNestedModel):
     None
     """
 
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+        extra="forbid"
+    )
+
     is_enabled: bool = Field(alias="isEnabled", description="Enable telemetry analysis", default=False)
 
 
-class TelemetryEnergyManagementModel(NDNestedModel):
+class TelemetryEnergyManagementModel(BaseModel):
     """
     # Summary
 
@@ -442,10 +504,17 @@ class TelemetryEnergyManagementModel(NDNestedModel):
     None
     """
 
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+        extra="forbid"
+    )
+
     cost: float = Field(description="Energy cost per unit", default=1.2)
 
 
-class TelemetryNasExportSettingsModel(NDNestedModel):
+class TelemetryNasExportSettingsModel(BaseModel):
     """
     # Summary
 
@@ -456,11 +525,18 @@ class TelemetryNasExportSettingsModel(NDNestedModel):
     None
     """
 
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+        extra="forbid"
+    )
+
     export_type: str = Field(alias="exportType", description="Export type", default="full")
     export_format: str = Field(alias="exportFormat", description="Export format", default="json")
 
 
-class TelemetryNasModel(NDNestedModel):
+class TelemetryNasModel(BaseModel):
     """
     # Summary
 
@@ -471,6 +547,13 @@ class TelemetryNasModel(NDNestedModel):
     None
     """
 
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+        extra="forbid"
+    )
+
     server: str = Field(description="NAS server address", default="")
     export_settings: TelemetryNasExportSettingsModel = Field(
         alias="exportSettings",
@@ -479,7 +562,7 @@ class TelemetryNasModel(NDNestedModel):
     )
 
 
-class TelemetrySettingsModel(NDNestedModel):
+class TelemetrySettingsModel(BaseModel):
     """
     # Summary
 
@@ -489,6 +572,13 @@ class TelemetrySettingsModel(NDNestedModel):
 
     None
     """
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+        extra="forbid"
+    )
 
     flow_collection: TelemetryFlowCollectionModel = Field(
         alias="flowCollection",
@@ -515,7 +605,7 @@ class TelemetrySettingsModel(NDNestedModel):
     )
 
 
-class ExternalStreamingSettingsModel(NDNestedModel):
+class ExternalStreamingSettingsModel(BaseModel):
     """
     # Summary
 
@@ -525,6 +615,13 @@ class ExternalStreamingSettingsModel(NDNestedModel):
 
     None
     """
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+        extra="forbid"
+    )
 
     email: List[Dict[str, Any]] = Field(description="Email streaming configuration", default_factory=list)
     message_bus: List[Dict[str, Any]] = Field(alias="messageBus", description="Message bus configuration", default_factory=list)
@@ -539,7 +636,7 @@ class ExternalStreamingSettingsModel(NDNestedModel):
     webhooks: List[Dict[str, Any]] = Field(description="Webhook configuration", default_factory=list)
 
 
-class VxlanIbgpManagementModel(NDNestedModel):
+class VxlanIbgpManagementModel(BaseModel):
     """
     # Summary
 
@@ -553,6 +650,13 @@ class VxlanIbgpManagementModel(NDNestedModel):
     - `ValueError` - If BGP ASN, VLAN ranges, or IP ranges are invalid
     - `TypeError` - If required string fields are not provided
     """
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        populate_by_name=True,
+        extra="forbid"
+    )
 
     # Fabric Type (required for discriminated union)
     type: Literal[FabricTypeEnum.VXLAN_IBGP] = Field(description="Fabric management type", default=FabricTypeEnum.VXLAN_IBGP)
@@ -1227,7 +1331,7 @@ class VxlanIbgpManagementModel(NDNestedModel):
         return value.lower()
 
 
-class FabricModel(NDBaseModel):
+class FabricModel(BaseModel):
     """
     # Summary
 
@@ -1244,14 +1348,10 @@ class FabricModel(NDBaseModel):
 
     model_config = ConfigDict(
         str_strip_whitespace=True,
-        use_enum_values=True,
         validate_assignment=True,
         populate_by_name=True,
         extra="forbid"
     )
-
-    identifiers: ClassVar[List[str]] = ["name"]
-    identifier_strategy: ClassVar[str] = "single"
 
     # Basic Fabric Properties
     category: Literal["fabric"] = Field(description="Resource category", default="fabric")
@@ -1322,33 +1422,8 @@ class FabricModel(NDBaseModel):
 
         return self
 
-    def to_payload(self) -> Dict[str, Any]:
-        """
-        # Summary
 
-        Convert model to API payload format.
-
-        ## Raises
-
-        None
-        """
-        return self.model_dump(by_alias=True, exclude_none=True)
-
-    @classmethod
-    def from_response(cls, response: Dict[str, Any]) -> 'FabricModel':
-        """
-        # Summary
-
-        Create model instance from API response.
-
-        ## Raises
-
-        - `ValueError` - If response data is invalid or missing required fields
-        """
-        return cls.model_validate(response, by_alias=True)
-
-
-class FabricDeleteModel(NDBaseModel):
+class FabricDeleteModel(BaseModel):
     """
     # Summary
 
@@ -1363,14 +1438,10 @@ class FabricDeleteModel(NDBaseModel):
 
     model_config = ConfigDict(
         str_strip_whitespace=True,
-        use_enum_values=True,
         validate_assignment=True,
         populate_by_name=True,
         extra="forbid"
     )
-
-    identifiers: ClassVar[List[str]] = ["name"]
-    identifier_strategy: ClassVar[str] = "single"
 
     name: str = Field(description="Name of the fabric to delete", min_length=1, max_length=64)
 
@@ -1390,31 +1461,6 @@ class FabricDeleteModel(NDBaseModel):
             raise ValueError(f"Fabric name can only contain letters, numbers, underscores, and hyphens, got: {value}")
 
         return value
-
-    def to_payload(self) -> Dict[str, Any]:
-        """
-        # Summary
-
-        Convert model to API payload format.
-
-        ## Raises
-
-        None
-        """
-        return self.model_dump(by_alias=True, exclude_none=True)
-
-    @classmethod
-    def from_response(cls, response: Dict[str, Any]) -> 'FabricDeleteModel':
-        """
-        # Summary
-
-        Create model instance from API response.
-
-        ## Raises
-
-        - `ValueError` - If response data is invalid or missing required fields
-        """
-        return cls.model_validate(response, by_alias=True)
 
 
 # Export all models for external use

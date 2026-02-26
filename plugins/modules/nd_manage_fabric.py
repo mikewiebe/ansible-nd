@@ -631,7 +631,7 @@ class NDFabricManager:
             existing_fabric = self._query_fabric(fabric_name)
 
             if existing_fabric:
-                self._update_fabric(fabric_name, update_config)
+                self._update_fabric(fabric_name, fabric_config)
             else:
                 # Create new fabric
                 self._create_fabric(fabric_config)
@@ -655,7 +655,7 @@ class NDFabricManager:
             existing_fabric = self._query_fabric(fabric_name)
 
             if existing_fabric:
-                self._update_fabric(fabric_name, update_config)
+                self._update_fabric(fabric_name, fabric_config)
             else:
                 # Create new fabric
                 self._create_fabric(fabric_config)
@@ -689,7 +689,7 @@ class NDFabricManager:
         for fabric_config in config:
             fabric_name = fabric_config["name"]
             if fabric_name in existing_names:
-                self._update_fabric(fabric_name, update_config)
+                self._update_fabric(fabric_name, fabric_config)
             else:
                 self._create_fabric(fabric_config)
 
