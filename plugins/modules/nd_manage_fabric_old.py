@@ -1423,7 +1423,6 @@ class Merged:
             want_fabric = fabric
             have_fabric = self.common.fabric_in_have(want_fabric.name)
 
-            # import epdb ; epdb.serve(port=5555)
             if want_fabric == have_fabric:
                 # want_fabric and have_fabric are the same, no action needed
                 self.log.debug("Fabric %s is already in the desired state, skipping.", want_fabric.name)
@@ -1436,6 +1435,19 @@ class Merged:
                 self.verb = "POST"
                 payload = copy.deepcopy(want_fabric.model_dump(by_alias=True))
             else:
+
+                diff_result = compare_fabric_models(have_fabric, want_fabric, logger=self.log)
+
+                if diff_result["has_differences"]:
+                    self.log.debug("Fabric %s differences:", want_fabric.name)
+                    for key, change in diff_result["values_changed"].items():
+                        self.log.debug("  CHANGED  %s: %r -> %r", key, change["have"], change["want"])
+                    for key, value in diff_result["items_added"].items():
+                        self.log.debug("  ADDED    %s: %r", key, value)
+                    for key, value in diff_result["items_removed"].items():
+                        self.log.debug("  REMOVED  %s: %r", key, value)
+                    self.log.debug("  DIFF DETAILS: %s", diff_result)
+
                 # If the fabric already exists in the have state, we will update it
                 self.log.debug("Fabric %s exists in the current state, updating it.", want_fabric.name)
                 self.path = "/api/v1/manage/fabrics" + f"/{want_fabric.name}"
@@ -1897,6 +1909,75 @@ class Query:
         # msg += f"check_mode: {self.check_mode}"
         self.log.debug(msg)
 
+
+def compare_fabric_models(have: "FabricModel", want: "FabricModel", logger=None) -> dict:
+    """
+    # Summary
+
+    Compare two `FabricModel` instances and return a structured diff.
+
+    ## Raises
+
+    - `None`
+    """
+    log = logger or logging.getLogger("nd.compare_fabric_models")
+
+    have_dict = have.model_dump(by_alias=True)
+    want_dict = want.model_dump(by_alias=True)
+
+    diff = DeepDiff(have_dict, want_dict, ignore_order=True)
+
+    result = {
+        "has_differences": bool(diff),
+        "values_changed": {},
+        "items_added": {},
+        "items_removed": {},
+    }
+
+    def _resolve_path(path_str: str, source: dict) -> tuple[list[str], object]:
+        """Parse a DeepDiff path and resolve its value from source dict."""
+        # Handle bracket notation: root['key1']['key2']
+        parts = re.findall(r"'([^']*)'", path_str)
+        if not parts:
+            # Handle dot notation: root.key1.key2
+            parts = path_str.split(".")
+            if parts and parts[0] == "root":
+                parts = parts[1:]
+
+        value = source
+        try:
+            for part in parts:
+                value = value[part]
+        except (KeyError, TypeError):
+            value = None
+
+        return parts, value
+
+    for path_str, change in diff.get("values_changed", {}).items():
+        parts, _ = _resolve_path(path_str, have_dict)
+        key = ".".join(parts)
+        result["values_changed"][key] = {
+            "have": change["old_value"],
+            "want": change["new_value"],
+        }
+        log.debug("Changed: %s | have=%s -> want=%s", key, change["old_value"], change["new_value"])
+
+    for path_str in diff.get("dictionary_item_added", set()):
+        parts, value = _resolve_path(path_str, want_dict)
+        key = ".".join(parts)
+        result["items_added"][key] = value
+        log.debug("Added:   %s = %s", key, value)
+
+    for path_str in diff.get("dictionary_item_removed", set()):
+        parts, value = _resolve_path(path_str, have_dict)
+        key = ".".join(parts)
+        result["items_removed"][key] = value
+        log.debug("Removed: %s = %s", key, value)
+
+    # Add the full diff for reference
+    result["full_diff"] = diff
+
+    return result
 
 def main():
     argument_spec = {}
