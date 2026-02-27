@@ -181,7 +181,7 @@ class OverlayModeEnum(str, Enum):
     """
 
     CLI = "cli"
-    CONFIG_PROFILE = "configProfile"
+    CONFIG_PROFILE = "config-profile"
 
 
 class LinkStateRoutingProtocolEnum(str, Enum):
@@ -215,7 +215,7 @@ class LocationModel(BaseModel):
         str_strip_whitespace=True,
         validate_assignment=True,
         populate_by_name=True,
-        extra="forbid"
+        extra="allow"
     )
 
     latitude: float = Field(
@@ -245,7 +245,7 @@ class NetflowExporterModel(BaseModel):
         str_strip_whitespace=True,
         validate_assignment=True,
         populate_by_name=True,
-        extra="forbid"
+        extra="allow"
     )
 
     exporter_name: str = Field(alias="exporterName", description="Name of the netflow exporter")
@@ -270,7 +270,7 @@ class NetflowRecordModel(BaseModel):
         str_strip_whitespace=True,
         validate_assignment=True,
         populate_by_name=True,
-        extra="forbid"
+        extra="allow"
     )
 
     record_name: str = Field(alias="recordName", description="Name of the netflow record")
@@ -293,7 +293,7 @@ class NetflowMonitorModel(BaseModel):
         str_strip_whitespace=True,
         validate_assignment=True,
         populate_by_name=True,
-        extra="forbid"
+        extra="allow"
     )
 
     monitor_name: str = Field(alias="monitorName", description="Name of the netflow monitor")
@@ -317,7 +317,7 @@ class NetflowSettingsModel(BaseModel):
         str_strip_whitespace=True,
         validate_assignment=True,
         populate_by_name=True,
-        extra="forbid"
+        extra="allow"
     )
 
     netflow: bool = Field(description="Enable netflow collection", default=False)
@@ -353,7 +353,7 @@ class BootstrapSubnetModel(BaseModel):
         str_strip_whitespace=True,
         validate_assignment=True,
         populate_by_name=True,
-        extra="forbid"
+        extra="allow"
     )
 
     start_ip: str = Field(alias="startIp", description="Starting IP address of the bootstrap range")
@@ -377,7 +377,7 @@ class FabricDesignSettingsModel(BaseModel):
         str_strip_whitespace=True,
         validate_assignment=True,
         populate_by_name=True,
-        extra="forbid"
+        extra="allow"
     )
 
     link_capacity: str = Field(alias="linkCapacity", description="Link capacity (e.g., '400Gb')", default="400Gb")
@@ -437,7 +437,7 @@ class TelemetryFlowCollectionModel(BaseModel):
         str_strip_whitespace=True,
         validate_assignment=True,
         populate_by_name=True,
-        extra="forbid"
+        extra="allow"
     )
 
     traffic_analytics: str = Field(alias="trafficAnalytics", description="Traffic analytics state", default="enabled")
@@ -465,7 +465,7 @@ class TelemetryMicroburstModel(BaseModel):
         str_strip_whitespace=True,
         validate_assignment=True,
         populate_by_name=True,
-        extra="forbid"
+        extra="allow"
     )
 
     microburst: bool = Field(description="Enable microburst detection", default=False)
@@ -487,7 +487,7 @@ class TelemetryAnalysisSettingsModel(BaseModel):
         str_strip_whitespace=True,
         validate_assignment=True,
         populate_by_name=True,
-        extra="forbid"
+        extra="allow"
     )
 
     is_enabled: bool = Field(alias="isEnabled", description="Enable telemetry analysis", default=False)
@@ -508,7 +508,7 @@ class TelemetryEnergyManagementModel(BaseModel):
         str_strip_whitespace=True,
         validate_assignment=True,
         populate_by_name=True,
-        extra="forbid"
+        extra="allow"
     )
 
     cost: float = Field(description="Energy cost per unit", default=1.2)
@@ -529,7 +529,7 @@ class TelemetryNasExportSettingsModel(BaseModel):
         str_strip_whitespace=True,
         validate_assignment=True,
         populate_by_name=True,
-        extra="forbid"
+        extra="allow"
     )
 
     export_type: str = Field(alias="exportType", description="Export type", default="full")
@@ -551,7 +551,7 @@ class TelemetryNasModel(BaseModel):
         str_strip_whitespace=True,
         validate_assignment=True,
         populate_by_name=True,
-        extra="forbid"
+        extra="allow"
     )
 
     server: str = Field(description="NAS server address", default="")
@@ -577,7 +577,7 @@ class TelemetrySettingsModel(BaseModel):
         str_strip_whitespace=True,
         validate_assignment=True,
         populate_by_name=True,
-        extra="forbid"
+        extra="allow"
     )
 
     flow_collection: TelemetryFlowCollectionModel = Field(
@@ -620,7 +620,7 @@ class ExternalStreamingSettingsModel(BaseModel):
         str_strip_whitespace=True,
         validate_assignment=True,
         populate_by_name=True,
-        extra="forbid"
+        extra="allow"
     )
 
     email: List[Dict[str, Any]] = Field(description="Email streaming configuration", default_factory=list)
@@ -655,7 +655,7 @@ class VxlanIbgpManagementModel(BaseModel):
         str_strip_whitespace=True,
         validate_assignment=True,
         populate_by_name=True,
-        extra="forbid"
+        extra="allow"
     )
 
     # Fabric Type (required for discriminated union)
@@ -664,6 +664,17 @@ class VxlanIbgpManagementModel(BaseModel):
     # Core iBGP Configuration
     bgp_asn: str = Field(alias="bgpAsn", description="BGP Autonomous System Number")
     site_id: str = Field(alias="siteId", description="Site identifier for the fabric")
+
+    # Missing Fields
+    border_count: Optional[int] = Field(alias="borderCount", description="Number of border switches", ge=0, le=32, default=0)
+    breakout_spine_interfaces: Optional[bool] = Field(alias="breakoutSpineInterfaces", description="Enable breakout spine interfaces", default=False)
+    designer_use_robot_password: Optional[bool] = Field(alias="designerUseRobotPassword", description="Use robot password for designer", default=False)
+    leaf_count: Optional[int] = Field(alias="leafCount", description="Number of leaf switches", ge=1, le=128, default=1)
+    name: Optional[str] = Field(description="Fabric name", min_length=1, max_length=64, default=None)
+    spine_count: Optional[int] = Field(alias="spineCount", description="Number of spine switches", ge=1, le=32, default=1)
+    vrf_lite_ipv6_subnet_range: Optional[str] = Field(alias="vrfLiteIpv6SubnetRange", description="VRF Lite IPv6 subnet range", default="fd00::a33:0/112")
+    vrf_lite_ipv6_subnet_target_mask: Optional[int] = Field(alias="vrfLiteIpv6SubnetTargetMask", description="VRF Lite IPv6 subnet target mask", ge=112, le=128, default=126)
+
 
     # Network Addressing
     bgp_loopback_ip_range: str = Field(
@@ -843,12 +854,12 @@ class VxlanIbgpManagementModel(BaseModel):
     )
 
     # Fabric Designer Settings
-    fabric_designer: bool = Field(alias="fabricDesigner", description="Enable fabric designer", default=False)
-    fabric_design_settings: Optional[FabricDesignSettingsModel] = Field(
-        alias="fabricDesignSettings",
-        description="Fabric designer settings",
-        default=None
-    )
+    # fabric_designer: bool = Field(alias="fabricDesigner", description="Enable fabric designer", default=False)
+    # fabric_design_settings: Optional[FabricDesignSettingsModel] = Field(
+    #     alias="fabricDesignSettings",
+    #     description="Fabric designer settings",
+    #     default=None
+    # )
 
     # Multicast Settings
     rendezvous_point_count: int = Field(
@@ -1188,21 +1199,30 @@ class VxlanIbgpManagementModel(BaseModel):
     )
 
     # DNS / NTP / Syslog Collections
-    dns_collection: List[str] = Field(alias="dnsCollection", description="DNS server collection", default_factory=list)
-    dns_vrf_collection: List[str] = Field(alias="dnsVrfCollection", description="DNS VRF collection", default_factory=list)
-    ntp_server_collection: List[str] = Field(alias="ntpServerCollection", description="NTP server collection", default_factory=list)
-    ntp_server_vrf_collection: List[str] = Field(
-        alias="ntpServerVrfCollection", description="NTP server VRF collection", default_factory=list
-    )
-    syslog_server_collection: List[str] = Field(
-        alias="syslogServerCollection", description="Syslog server collection", default_factory=list
-    )
-    syslog_severity_collection: List[int] = Field(
-        alias="syslogSeverityCollection", description="Syslog severity collection", default_factory=list
-    )
-    syslog_server_vrf_collection: List[str] = Field(
-        alias="syslogServerVrfCollection", description="Syslog server VRF collection", default_factory=list
-    )
+    # dns_collection: List[str] = Field(alias="dnsCollection", description="DNS server collection", default_factory=list)
+    # dns_collection: List[str] = Field(default_factory=lambda: ["5.192.28.174"], alias="dnsCollection")
+    # dns_vrf_collection: List[str] = Field(alias="dnsVrfCollection", description="DNS VRF collection", default_factory=list)
+    # ntp_server_collection: List[str] = Field(alias="ntpServerCollection", description="NTP server collection", default_factory=list)
+    # ntp_server_vrf_collection: List[str] = Field(
+    #     alias="ntpServerVrfCollection", description="NTP server VRF collection", default_factory=list
+    # )
+    # syslog_server_collection: List[str] = Field(
+    #     alias="syslogServerCollection", description="Syslog server collection", default_factory=list
+    # )
+    # syslog_severity_collection: List[int] = Field(
+    #     alias="syslogSeverityCollection", description="Syslog severity collection", default_factory=list
+    # )
+    # syslog_server_vrf_collection: List[str] = Field(
+    #     alias="syslogServerVrfCollection", description="Syslog server VRF collection", default_factory=list
+    # )
+
+    ntp_server_collection: List[str] = Field(default_factory=lambda: ["string"], alias="ntpServerCollection")
+    ntp_server_vrf_collection: List[str] = Field(default_factory=lambda: ["string"], alias="ntpServerVrfCollection")
+    dns_collection: List[str] = Field(default_factory=lambda: ["5.192.28.174"], alias="dnsCollection")
+    dns_vrf_collection: List[str] = Field(default_factory=lambda: ["string"], alias="dnsVrfCollection")
+    syslog_server_collection: List[str] = Field(default_factory=lambda: ["string"], alias="syslogServerCollection")
+    syslog_server_vrf_collection: List[str] = Field(default_factory=lambda: ["string"], alias="syslogServerVrfCollection")
+    syslog_severity_collection: List[int] = Field(default_factory=lambda: [7], alias="syslogSeverityCollection", description="Syslog severity levels (0-7)")
 
     # Extra Config / Pre-Interface Config / AAA / Banner
     banner: str = Field(description="Fabric banner text", default="")
@@ -1255,20 +1275,20 @@ class VxlanIbgpManagementModel(BaseModel):
         alias="brownfieldSkipOverlayNetworkAttachments", description="Skip brownfield overlay network attachments", default=False
     )
     allow_smart_switch_onboarding: bool = Field(
-        alias="allowSmartSwitchOnboarding", description="Allow smart switch onboarding", default=True
+        alias="allowSmartSwitchOnboarding", description="Allow smart switch onboarding", default=False
     )
 
     # HyperShield Connectivity
-    hypershield_connectivity_source_intf: str = Field(
-        alias="hypershieldConnectivitySourceIntf", description="HyperShield connectivity source interface", default=""
-    )
-    connectivity_domain_name: str = Field(alias="connectivityDomainName", description="Connectivity domain name", default="")
-    hypershield_connectivity_proxy_server: str = Field(
-        alias="hypershieldConnectivityProxyServer", description="HyperShield connectivity proxy server", default=""
-    )
-    hypershield_connectivity_proxy_server_port: int = Field(
-        alias="hypershieldConnectivityProxyServerPort", description="HyperShield connectivity proxy server port", default=0
-    )
+    # hypershield_connectivity_source_intf: str = Field(
+    #     alias="hypershieldConnectivitySourceIntf", description="HyperShield connectivity source interface", default=None
+    # )
+    # connectivity_domain_name: str = Field(alias="connectivityDomainName", description="Connectivity domain name", default=None)
+    # hypershield_connectivity_proxy_server: str = Field(
+    #     alias="hypershieldConnectivityProxyServer", description="HyperShield connectivity proxy server", default=None
+    # )
+    # hypershield_connectivity_proxy_server_port: int = Field(
+    #     alias="hypershieldConnectivityProxyServerPort", description="HyperShield connectivity proxy server port", default=None
+    # )
 
     @field_validator("bgp_asn")
     @classmethod
@@ -1350,7 +1370,7 @@ class FabricModel(BaseModel):
         str_strip_whitespace=True,
         validate_assignment=True,
         populate_by_name=True,
-        extra="forbid"
+        extra="allow"  # Allow extra fields from API responses
     )
 
     # Basic Fabric Properties
@@ -1440,7 +1460,7 @@ class FabricDeleteModel(BaseModel):
         str_strip_whitespace=True,
         validate_assignment=True,
         populate_by_name=True,
-        extra="forbid"
+        extra="allow"
     )
 
     name: str = Field(description="Name of the fabric to delete", min_length=1, max_length=64)
