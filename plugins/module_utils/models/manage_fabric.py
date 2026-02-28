@@ -666,11 +666,11 @@ class VxlanIbgpManagementModel(BaseModel):
     site_id: str = Field(alias="siteId", description="Site identifier for the fabric")
 
     # Missing Fields
+    name: Optional[str] = Field(description="Fabric name", min_length=1, max_length=64, default="")
     border_count: Optional[int] = Field(alias="borderCount", description="Number of border switches", ge=0, le=32, default=0)
     breakout_spine_interfaces: Optional[bool] = Field(alias="breakoutSpineInterfaces", description="Enable breakout spine interfaces", default=False)
     designer_use_robot_password: Optional[bool] = Field(alias="designerUseRobotPassword", description="Use robot password for designer", default=False)
     leaf_count: Optional[int] = Field(alias="leafCount", description="Number of leaf switches", ge=1, le=128, default=1)
-    name: Optional[str] = Field(description="Fabric name", min_length=1, max_length=64, default=None)
     spine_count: Optional[int] = Field(alias="spineCount", description="Number of spine switches", ge=1, le=32, default=1)
     vrf_lite_ipv6_subnet_range: Optional[str] = Field(alias="vrfLiteIpv6SubnetRange", description="VRF Lite IPv6 subnet range", default="fd00::a33:0/112")
     vrf_lite_ipv6_subnet_target_mask: Optional[int] = Field(alias="vrfLiteIpv6SubnetTargetMask", description="VRF Lite IPv6 subnet target mask", ge=112, le=128, default=126)
@@ -1434,6 +1434,9 @@ class FabricModel(BaseModel):
         # Ensure management type matches model type
         if self.management.type != FabricTypeEnum.VXLAN_IBGP:
             raise ValueError(f"Management type must be {FabricTypeEnum.VXLAN_IBGP}")
+
+        # Propagate fabric name to management model
+        self.management.name = self.name
 
         # Validate telemetry consistency
         if self.telemetry_collection and self.telemetry_settings is None:
