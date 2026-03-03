@@ -663,7 +663,7 @@ class VxlanIbgpManagementModel(BaseModel):
 
     # Core iBGP Configuration
     bgp_asn: str = Field(alias="bgpAsn", description="BGP Autonomous System Number")
-    site_id: str = Field(alias="siteId", description="Site identifier for the fabric")
+    site_id: Optional[str] = Field(alias="siteId", description="Site identifier for the fabric", default="")
 
     # Missing Fields
     name: Optional[str] = Field(description="Fabric name", min_length=1, max_length=64, default="")
@@ -1376,7 +1376,7 @@ class FabricModel(BaseModel):
     # Basic Fabric Properties
     category: Literal["fabric"] = Field(description="Resource category", default="fabric")
     name: str = Field(description="Fabric name", min_length=1, max_length=64)
-    location: LocationModel = Field(description="Geographic location of the fabric")
+    location: Optional[LocationModel] = Field(description="Geographic location of the fabric", default=None)
 
     # License and Operations
     license_tier: LicenseTierEnum = Field(alias="licenseTier", description="License tier", default=LicenseTierEnum.PREMIER)
@@ -1389,7 +1389,7 @@ class FabricModel(BaseModel):
     security_domain: str = Field(alias="securityDomain", description="Security domain", default="all")
 
     # Core Management Configuration
-    management: VxlanIbgpManagementModel = Field(description="iBGP VXLAN management configuration")
+    management: Optional[VxlanIbgpManagementModel] = Field(description="iBGP VXLAN management configuration", default=None)
 
     # Optional Advanced Settings
     telemetry_settings: Optional[TelemetrySettingsModel] = Field(
@@ -1432,11 +1432,16 @@ class FabricModel(BaseModel):
         - `ValueError` - If fabric settings are inconsistent
         """
         # Ensure management type matches model type
-        if self.management.type != FabricTypeEnum.VXLAN_IBGP:
+        if self.management is not None and self.management.type != FabricTypeEnum.VXLAN_IBGP:
             raise ValueError(f"Management type must be {FabricTypeEnum.VXLAN_IBGP}")
 
         # Propagate fabric name to management model
-        self.management.name = self.name
+        if self.management is not None:
+            self.management.name = self.name
+
+        # Propgate BGP ASN to Site ID management model if not set
+        if self.management is not None and self.management.site_id == "":
+            self.management.site_id = self.management.bgp_asn  # Default site ID to BGP ASN if not provided
 
         # Validate telemetry consistency
         if self.telemetry_collection and self.telemetry_settings is None:
